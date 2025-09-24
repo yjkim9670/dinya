@@ -21,7 +21,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
@@ -42,6 +42,20 @@
         .header p {
             font-size: 1.1rem;
             opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .current-time {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            min-width: 280px;
         }
 
         .passenger-info {
@@ -50,15 +64,20 @@
             padding: 10px 20px;
             border-radius: 25px;
             display: inline-block;
-            margin-top: 10px;
             font-size: 0.9rem;
+        }
+
+        .journeys-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
         }
 
         .journey-card {
             background: white;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
             overflow: hidden;
             transition: transform 0.3s ease;
         }
@@ -69,7 +88,7 @@
 
         .journey-header {
             padding: 25px 30px;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: white;
             text-align: center;
@@ -84,12 +103,12 @@
         }
 
         .journey-content {
-            padding: 30px;
+            padding: 25px;
         }
 
         .leg {
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-bottom: 20px;
+            padding: 18px;
             border-radius: 12px;
             position: relative;
         }
@@ -118,7 +137,7 @@
         }
 
         .train-type {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -126,34 +145,34 @@
         }
 
         .train-number {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
         }
 
         .duration {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             background: rgba(255,255,255,0.2);
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
         }
 
         .route {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
+            font-size: 1rem;
+            margin-bottom: 12px;
             text-align: center;
             font-weight: 500;
         }
 
         .route-arrow {
-            margin: 0 10px;
-            font-size: 1.2rem;
+            margin: 0 8px;
+            font-size: 1.1rem;
         }
 
         .times {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .time-block {
@@ -161,38 +180,38 @@
         }
 
         .time-label {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             opacity: 0.8;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .time-value {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 600;
         }
 
         .seat-info {
             background: rgba(255,255,255,0.15);
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 8px;
-            font-size: 0.9rem;
-            margin-top: 10px;
+            font-size: 0.8rem;
+            margin-top: 8px;
         }
 
         .seat-info .seat-label {
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .countdown {
             background: rgba(255,255,255,0.2);
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
             text-align: center;
-            margin-top: 10px;
-            font-size: 0.9rem;
+            margin-top: 8px;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
@@ -205,37 +224,37 @@
             background: #f8f9fa;
             border: 2px dashed #dee2e6;
             border-radius: 12px;
-            padding: 20px;
-            margin: 25px 0;
+            padding: 15px;
+            margin: 20px 0;
             text-align: center;
         }
 
         .transfer-header {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #495057;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .wait-time {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #fd7e14;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .transfer-tip {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #6c757d;
             font-style: italic;
             background: #e9ecef;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .tips-section {
@@ -243,6 +262,7 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            grid-column: 1 / -1;
         }
 
         .tips-header {
@@ -285,11 +305,29 @@
             background: #f8d7da;
             border: 2px solid #f5c6cb;
             color: #721c24;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
             text-align: center;
             font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 968px) {
+            .journeys-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .journey-header {
+                font-size: 1.2rem;
+                padding: 20px 25px;
+            }
+            
+            .journey-content {
+                padding: 20px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -301,8 +339,10 @@
                 font-size: 2rem;
             }
 
-            .journey-content {
-                padding: 20px;
+            .current-time {
+                font-size: 1rem;
+                padding: 12px 20px;
+                min-width: auto;
             }
 
             .leg {
@@ -311,17 +351,17 @@
 
             .times {
                 flex-direction: column;
-                gap: 15px;
+                gap: 10px;
             }
 
             .route {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
 
             .leg-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 8px;
             }
 
             .duration {
@@ -335,8 +375,8 @@
             }
 
             .journey-header {
-                font-size: 1.2rem;
-                padding: 20px;
+                font-size: 1.1rem;
+                padding: 18px 20px;
             }
 
             .leg-header {
@@ -354,213 +394,234 @@
         <div class="header">
             <h1>🚄 기차 여행 일정</h1>
             <p>동탄 ↔ 순천 • 2025년 10월 5-6일</p>
+            <div class="current-time" id="currentTime">
+                현재 시각: 로딩 중...
+            </div>
             <div class="passenger-info">👥 승객 2명</div>
         </div>
 
-        <!-- Journey 1: To Suncheon -->
-        <div class="journey-card">
-            <div class="journey-header to-suncheon">
-                🗓️ 1일차: 순천행 (10월 5일, 토요일)
-            </div>
-            <div class="journey-content">
-                <!-- Leg 1: SRT -->
-                <div class="leg srt-leg">
-                    <div class="leg-header">
-                        <div class="train-info">
-                            <div class="train-type">🚄 SRT</div>
-                            <div class="train-number">SRT665편</div>
-                        </div>
-                        <div class="duration">29분</div>
-                    </div>
-                    <div class="route">
-                        동탄 <span class="route-arrow">→</span> 오송
-                    </div>
-                    <div class="times">
-                        <div class="time-block">
-                            <div class="time-label">출발</div>
-                            <div class="time-value">19:26</div>
-                        </div>
-                        <div class="time-block">
-                            <div class="time-label">도착</div>
-                            <div class="time-value">19:55</div>
-                        </div>
-                    </div>
-                    <div class="seat-info">
-                        <div class="seat-label">🎫 좌석 정보:</div>
-                        <div>11호차 10B, 18호차 3C</div>
-                    </div>
-                    <div class="countdown" id="countdown1">
-                        출발까지: 계산 중...
-                    </div>
+        <div class="journeys-container">
+            <!-- Journey 1: To Suncheon -->
+            <div class="journey-card">
+                <div class="journey-header to-suncheon">
+                    🗓️ 1일차: 순천행 (10월 5일, 토요일)
                 </div>
+                <div class="journey-content">
+                    <!-- Leg 1: SRT -->
+                    <div class="leg srt-leg">
+                        <div class="leg-header">
+                            <div class="train-info">
+                                <div class="train-type">🚄 SRT</div>
+                                <div class="train-number">SRT 665편</div>
+                            </div>
+                            <div class="duration">29분</div>
+                        </div>
+                        <div class="route">
+                            동탄 <span class="route-arrow">→</span> 오송
+                        </div>
+                        <div class="times">
+                            <div class="time-block">
+                                <div class="time-label">출발</div>
+                                <div class="time-value">19:26</div>
+                            </div>
+                            <div class="time-block">
+                                <div class="time-label">도착</div>
+                                <div class="time-value">19:55</div>
+                            </div>
+                        </div>
+                        <div class="seat-info">
+                            <div class="seat-label">🎫 좌석 정보:</div>
+                            <div>11호차 10B, 18호차 3C</div>
+                        </div>
+                        <div class="countdown" id="countdown1">
+                            출발까지: 계산 중...
+                        </div>
+                    </div>
 
-                <!-- Transfer -->
-                <div class="transfer">
-                    <div class="transfer-header">
-                        🔄 오송역 환승
+                    <!-- Transfer -->
+                    <div class="transfer">
+                        <div class="transfer-header">
+                            🔄 오송역 환승
+                        </div>
+                        <div class="wait-time">⏱️ 대기시간: 1시간 6분</div>
+                        <div class="transfer-tip">
+                            "역에서 간단한 저녁이나 커피를 마시기에 충분한 시간입니다."
+                        </div>
                     </div>
-                    <div class="wait-time">⏱️ 대기시간: 1시간 6분</div>
-                    <div class="transfer-tip">
-                        "역에서 간단한 저녁이나 커피를 마시기에 충분한 시간입니다."
-                    </div>
-                </div>
 
-                <!-- Leg 2: KTX -->
-                <div class="leg ktx-leg">
-                    <div class="leg-header">
-                        <div class="train-info">
-                            <div class="train-type">🚄 KTX</div>
-                            <div class="train-number">KTX521편</div>
+                    <!-- Leg 2: KTX -->
+                    <div class="leg ktx-leg">
+                        <div class="leg-header">
+                            <div class="train-info">
+                                <div class="train-type">🚄 KTX</div>
+                                <div class="train-number">KTX 521편</div>
+                            </div>
+                            <div class="duration">1시간 46분</div>
                         </div>
-                        <div class="duration">1시간 46분</div>
-                    </div>
-                    <div class="route">
-                        오송 <span class="route-arrow">→</span> 순천
-                    </div>
-                    <div class="times">
-                        <div class="time-block">
-                            <div class="time-label">출발</div>
-                            <div class="time-value">21:01</div>
+                        <div class="route">
+                            오송 <span class="route-arrow">→</span> 순천
                         </div>
-                        <div class="time-block">
-                            <div class="time-label">도착</div>
-                            <div class="time-value">22:47</div>
+                        <div class="times">
+                            <div class="time-block">
+                                <div class="time-label">출발</div>
+                                <div class="time-value">21:01</div>
+                            </div>
+                            <div class="time-block">
+                                <div class="time-label">도착</div>
+                                <div class="time-value">22:47</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="seat-info">
-                        <div class="seat-label">🎫 좌석 정보:</div>
-                        <div>11호차 11B, 17호차 3C</div>
-                    </div>
-                    <div class="countdown" id="countdown2">
-                        출발까지: 계산 중...
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Journey 2: Return -->
-        <div class="journey-card">
-            <div class="journey-header return-home">
-                🗓️ 2일차: 동탄행 (10월 6일, 일요일)
-            </div>
-            <div class="journey-content">
-                <!-- Leg 1: KTX -->
-                <div class="leg ktx-leg">
-                    <div class="leg-header">
-                        <div class="train-info">
-                            <div class="train-type">🚄 KTX-산천</div>
-                            <div class="train-number">KTX-산천522편</div>
+                        <div class="seat-info">
+                            <div class="seat-label">🎫 좌석 정보:</div>
+                            <div>11호차 11B, 17호차 3C</div>
                         </div>
-                        <div class="duration">1시간 49분</div>
-                    </div>
-                    <div class="route">
-                        순천 <span class="route-arrow">→</span> 오송
-                    </div>
-                    <div class="times">
-                        <div class="time-block">
-                            <div class="time-label">출발</div>
-                            <div class="time-value">20:44</div>
+                        <div class="countdown" id="countdown2">
+                            출발까지: 계산 중...
                         </div>
-                        <div class="time-block">
-                            <div class="time-label">도착</div>
-                            <div class="time-value">22:33</div>
-                        </div>
-                    </div>
-                    <div class="seat-info">
-                        <div class="seat-label">🎫 좌석 정보:</div>
-                        <div>좌석 미정</div>
-                    </div>
-                    <div class="countdown" id="countdown3">
-                        출발까지: 계산 중...
-                    </div>
-                </div>
-
-                <!-- Transfer -->
-                <div class="transfer">
-                    <div class="transfer-header">
-                        🔄 오송역 환승
-                    </div>
-                    <div class="wait-time">⏱️ 대기시간: 1시간 4분</div>
-                    <div class="transfer-tip">
-                        "편의점에서 간식을 사거나 대기실에서 쉬기 좋은 시간입니다."
-                    </div>
-                </div>
-
-                <!-- Leg 2: SRT -->
-                <div class="leg srt-leg">
-                    <div class="leg-header">
-                        <div class="train-info">
-                            <div class="train-type">🚄 SRT</div>
-                            <div class="train-number">SRT9376편</div>
-                        </div>
-                        <div class="duration">24분</div>
-                    </div>
-                    <div class="route">
-                        오송 <span class="route-arrow">→</span> 동탄
-                    </div>
-                    <div class="times">
-                        <div class="time-block">
-                            <div class="time-label">출발</div>
-                            <div class="time-value">23:37</div>
-                        </div>
-                        <div class="time-block">
-                            <div class="time-label">도착</div>
-                            <div class="time-value">00:01</div>
-                        </div>
-                    </div>
-                    <div class="seat-info">
-                        <div class="seat-label">🎫 좌석 정보:</div>
-                        <div>14호차 8A, 18호차 1B</div>
-                    </div>
-                    <div class="countdown" id="countdown4">
-                        출발까지: 계산 중...
-                    </div>
-                    <div class="midnight-warning">
-                        ⚠️ 10월 7일 월요일 자정 이후 도착
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tips Section -->
-        <div class="tips-section">
-            <div class="tips-header">
-                ✅ 체크리스트 & 중요 팁
-            </div>
-            
-            <div class="tip-item important">
-                <div class="tip-title">⭐ 가장 중요:</div>
-                <div class="tip-content">
-                    자정 이후(00:01 월요일)에 동탄역에 도착하므로 마지막 버스/지하철 시간을 확인하세요. 만약을 대비해 택시 앱을 준비해두세요.
+            <!-- Journey 2: Return -->
+            <div class="journey-card">
+                <div class="journey-header return-home">
+                    🗓️ 2일차: 동탄행 (10월 6일, 일요일)
+                </div>
+                <div class="journey-content">
+                    <!-- Leg 1: KTX -->
+                    <div class="leg ktx-leg">
+                        <div class="leg-header">
+                            <div class="train-info">
+                                <div class="train-type">🚄 KTX-산천</div>
+                                <div class="train-number">KTX-산천 522편</div>
+                            </div>
+                            <div class="duration">1시간 49분</div>
+                        </div>
+                        <div class="route">
+                            순천 <span class="route-arrow">→</span> 오송
+                        </div>
+                        <div class="times">
+                            <div class="time-block">
+                                <div class="time-label">출발</div>
+                                <div class="time-value">20:44</div>
+                            </div>
+                            <div class="time-block">
+                                <div class="time-label">도착</div>
+                                <div class="time-value">22:33</div>
+                            </div>
+                        </div>
+                        <div class="seat-info">
+                            <div class="seat-label">🎫 좌석 정보:</div>
+                            <div>좌석 미정</div>
+                        </div>
+                        <div class="countdown" id="countdown3">
+                            출발까지: 계산 중...
+                        </div>
+                    </div>
+
+                    <!-- Transfer -->
+                    <div class="transfer">
+                        <div class="transfer-header">
+                            🔄 오송역 환승
+                        </div>
+                        <div class="wait-time">⏱️ 대기시간: 1시간 4분</div>
+                        <div class="transfer-tip">
+                            "편의점에서 간식을 사거나 대기실에서 쉬기 좋은 시간입니다."
+                        </div>
+                    </div>
+
+                    <!-- Leg 2: SRT -->
+                    <div class="leg srt-leg">
+                        <div class="leg-header">
+                            <div class="train-info">
+                                <div class="train-type">🚄 SRT</div>
+                                <div class="train-number">SRT 9376편</div>
+                            </div>
+                            <div class="duration">24분</div>
+                        </div>
+                        <div class="route">
+                            오송 <span class="route-arrow">→</span> 동탄
+                        </div>
+                        <div class="times">
+                            <div class="time-block">
+                                <div class="time-label">출발</div>
+                                <div class="time-value">23:37</div>
+                            </div>
+                            <div class="time-block">
+                                <div class="time-label">도착</div>
+                                <div class="time-value">00:01</div>
+                            </div>
+                        </div>
+                        <div class="seat-info">
+                            <div class="seat-label">🎫 좌석 정보:</div>
+                            <div>14호차 8A, 18호차 1B</div>
+                        </div>
+                        <div class="countdown" id="countdown4">
+                            출발까지: 계산 중...
+                        </div>
+                        <div class="midnight-warning">
+                            ⚠️ 10월 7일 월요일 자정 이후 도착
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="tip-item">
-                <div class="tip-title">🏢 오송역:</div>
-                <div class="tip-content">
-                    오송역은 주요 환승 허브로 식당, 카페, 편의점 등 편의시설이 잘 갖춰져 있습니다.
+            <!-- Tips Section -->
+            <div class="tips-section">
+                <div class="tips-header">
+                    ✅ 체크리스트 & 중요 팁
                 </div>
-            </div>
+                
+                <div class="tip-item important">
+                    <div class="tip-title">⭐ 가장 중요:</div>
+                    <div class="tip-content">
+                        자정 이후(00:01 월요일)에 동탄역에 도착하므로 마지막 버스/지하철 시간을 확인하세요. 만약을 대비해 택시 앱을 준비해두세요.
+                    </div>
+                </div>
 
-            <div class="tip-item">
-                <div class="tip-title">📱 모바일 승차권:</div>
-                <div class="tip-content">
-                    코레일/SRT 모바일 앱을 이용하면 QR코드로 간편하게 승차할 수 있습니다.
+                <div class="tip-item">
+                    <div class="tip-title">🏢 오송역:</div>
+                    <div class="tip-content">
+                        오송역은 주요 환승 허브로 식당, 카페, 편의점 등 편의시설이 잘 갖춰져 있습니다.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">📱 모바일 승차권:</div>
+                    <div class="tip-content">
+                        코레일/SRT 모바일 앱을 이용하면 QR코드로 간편하게 승차할 수 있습니다.
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        function updateCurrentTime() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            
+            const timeString = now.toLocaleString('ko-KR', options);
+            document.getElementById('currentTime').textContent = `🕐 현재 시각: ${timeString}`;
+        }
+
         function updateCountdowns() {
             const now = new Date();
             
             // 2025년 기준 출발 시간들
             const departures = [
-                new Date(2025, 9, 5, 19, 26), // 10월 5일 19:26 (SRT665)
-                new Date(2025, 9, 5, 21, 1),  // 10월 5일 21:01 (KTX521)
-                new Date(2025, 9, 6, 20, 44), // 10월 6일 20:44 (KTX-산천522)
-                new Date(2025, 9, 6, 23, 37)  // 10월 6일 23:37 (SRT9376)
+                new Date(2025, 9, 5, 19, 26), // 10월 5일 19:26 (SRT 665)
+                new Date(2025, 9, 5, 21, 1),  // 10월 5일 21:01 (KTX 521)
+                new Date(2025, 9, 6, 20, 44), // 10월 6일 20:44 (KTX-산천 522)
+                new Date(2025, 9, 6, 23, 37)  // 10월 6일 23:37 (SRT 9376)
             ];
 
             for (let i = 0; i < departures.length; i++) {
@@ -588,9 +649,14 @@
             }
         }
 
-        // 1초마다 카운트다운 업데이트
-        updateCountdowns();
-        setInterval(updateCountdowns, 1000);
+        function updateAll() {
+            updateCurrentTime();
+            updateCountdowns();
+        }
+
+        // 초기 실행 및 1초마다 업데이트
+        updateAll();
+        setInterval(updateAll, 1000);
     </script>
 </body>
 </html>

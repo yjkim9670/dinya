@@ -1,10 +1,27 @@
-- 👋 Hi, I’m @Yangdorin
-- 👀 I’m interested in ...
-- 🌱 I’m currently learning ...
-- 💞️ I’m looking to collaborate on ...
-- 📫 How to reach me ...
+# Conversation Intelligence Dashboard Implementation Plan
 
-<!---
-Yangdorin/Yangdorin is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
-You can click the Preview link to take a look at your changes.
---->
+## 목표 개요
+카카오톡 대화 원문을 기반으로 날짜/시간대별 발화량, 핵심 키워드, 참여자 인사이트를 정량화하고, KOSPI와 S&P500 지표를 함께 비교할 수 있는 통합 대시보드를 `index.html` 중심으로 구현한다. 원문 전체를 복사하여 전달할 수 없는 제약을 고려하여, 분석과 원문을 HTML 파일(또는 연결된 별도 HTML) 내부에 직접 삽입하거나 연계하여 누구나 접근할 수 있도록 한다.
+
+## 4단계 실행 계획
+
+### 1. 데이터 수집 및 저장 구조 정비
+- `kakaotalk_conversation.txt`를 파싱해 날짜, 시간대, 발화자, 메시지 본문을 구조화하고, 전처리된 결과를 JSON으로 저장한다.
+- 원문 전체를 `conversation_full.html`(신규) 또는 `index.html` 내부의 숨김/아코디언 섹션에 그대로 삽입하여, 외부에서 대화 전문을 HTML을 통해 열람할 수 있도록 한다.
+- `conversation_insights.md` 등 기존 분석 자료를 HTML로 변환하거나 `index.html`에서 불러오도록 연결해, 분석 결과와 원문이 함께 보관되도록 구성한다.
+
+### 2. 분석 파이프라인 및 지표 산출
+- 전처리된 데이터를 기반으로 날짜별·시간대별 발화량, 참여자별 메시지 수, 키워드(단어 빈도·TF-IDF), 감성 지표 등을 산출하는 스크립트를 작성한다.
+- 결과 지표를 `metrics.json`과 같은 통합 데이터 객체로 정리해 `index.html`에서 비동기로 로드하거나 인라인 스크립트로 포함한다.
+- KOSPI와 S&P500 지표는 `market_indices.json` 파일로 저장하고, 대화 날짜와 매칭될 수 있도록 변동률·종가 정보를 계산해 둔다.
+
+### 3. 대시보드 레이아웃 및 시각화 구현
+- `index.html`을 재구성해 상단 KPI, 중단 멀티 그래프 탭(날짜별 발화량 vs. 주가지수, 시간대 히트맵, 키워드 버블/워드클라우드, 참여자 네트워크), 하단 스토리·원문 섹션으로 배치한다.
+- Chart.js 또는 ECharts를 사용해 날짜별 발화량과 KOSPI/S&P500 지표를 이중축 라인/에어리어 그래프로 표현하고, 시간대별 발화 히트맵, 키워드 버블 차트 등을 구현한다.
+- 원문 및 분석 내용을 HTML 내 탭/아코디언/모달에 연결하여, 그래프와 함께 서사·텍스트 분석을 한 화면에서 탐색할 수 있도록 한다.
+
+### 4. 접근성, 성능, 배포 검증
+- 반응형 레이아웃, 명도 대비, 스크린리더 레이블 등 접근성 요소를 검토하고, 데이터 없을 때의 예외 처리를 추가한다.
+- 로딩 퍼포먼스를 위해 데이터 지연 로딩, 그래프 초기화 최적화, 캐시 전략을 적용한다.
+- 로컬 및 배포 환경에서 HTML 렌더링을 확인하고, 대화 원문/분석 HTML 파일이 정상 연결되는지 테스트한 후 GitHub Pages 등으로 배포한다.
+

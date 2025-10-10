@@ -1,662 +1,206 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>기차 여행 일정 - 동탄 ↔ 순천</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-bottom: 15px;
-        }
-
-        .current-time {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            display: inline-block;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            min-width: 280px;
-        }
-
-        .passenger-info {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .journeys-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .journey-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .journey-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .journey-header {
-            padding: 25px 30px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: white;
-            text-align: center;
-        }
-
-        .to-suncheon {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-        }
-
-        .return-home {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-        }
-
-        .journey-content {
-            padding: 25px;
-        }
-
-        .leg {
-            margin-bottom: 20px;
-            padding: 18px;
-            border-radius: 12px;
-            position: relative;
-        }
-
-        .srt-leg {
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-            color: white;
-        }
-
-        .ktx-leg {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-        }
-
-        .leg-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .train-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .train-type {
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .train-number {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-
-        .duration {
-            font-size: 0.8rem;
-            background: rgba(255,255,255,0.2);
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-
-        .route {
-            font-size: 1rem;
-            margin-bottom: 12px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .route-arrow {
-            margin: 0 8px;
-            font-size: 1.1rem;
-        }
-
-        .times {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .time-block {
-            text-align: center;
-        }
-
-        .time-label {
-            font-size: 0.7rem;
-            opacity: 0.8;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .time-value {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .seat-info {
-            background: rgba(255,255,255,0.15);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            margin-top: 8px;
-        }
-
-        .seat-info .seat-label {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .countdown {
-            background: rgba(255,255,255,0.2);
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .countdown.past {
-            background: rgba(255,255,255,0.1);
-            opacity: 0.7;
-        }
-
-        .transfer {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .transfer-header {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .wait-time {
-            font-size: 1.1rem;
-            color: #fd7e14;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .transfer-tip {
-            font-size: 0.8rem;
-            color: #6c757d;
-            font-style: italic;
-            background: #e9ecef;
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-
-        .tips-section {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            grid-column: 1 / -1;
-        }
-
-        .tips-header {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .tip-item {
-            background: #f8f9fa;
-            border-left: 4px solid #28a745;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .tip-item.important {
-            background: #fff3cd;
-            border-left-color: #ffc107;
-        }
-
-        .tip-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .tip-content {
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        .midnight-warning {
-            background: #f8d7da;
-            border: 2px solid #f5c6cb;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 8px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-
-        /* 모바일 반응형 */
-        @media (max-width: 968px) {
-            .journeys-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .journey-header {
-                font-size: 1.2rem;
-                padding: 20px 25px;
-            }
-            
-            .journey-content {
-                padding: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 15px;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .current-time {
-                font-size: 1rem;
-                padding: 12px 20px;
-                min-width: auto;
-            }
-
-            .leg {
-                padding: 15px;
-            }
-
-            .times {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .route {
-                font-size: 0.95rem;
-            }
-
-            .leg-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-
-            .duration {
-                align-self: flex-end;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.7rem;
-            }
-
-            .journey-header {
-                font-size: 1.1rem;
-                padding: 18px 20px;
-            }
-
-            .leg-header {
-                align-items: center;
-            }
-
-            .duration {
-                align-self: auto;
-            }
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>카톡 대화 인포그래픽 — 날짜별 발화 & 키워드 분류</title>
+<style>
+  :root { --bg:#0b1220; --card:#121a2b; --ink:#e9eefb; --muted:#9fb1d1; --accent:#7cc4ff; --grid:#22304a; }
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,Apple SD Gothic Neo,Malgun Gothic,Arial}
+  header{padding:20px 24px;border-bottom:1px solid var(--grid);display:flex;gap:12px;align-items:center}
+  header h1{font-size:18px;margin:0}
+  main{display:grid;grid-template-columns:420px 1fr;gap:16px;padding:16px}
+  .panel{background:var(--card);border:1px solid var(--grid);border-radius:14px}
+  .panel h2{font-size:14px;color:var(--muted);margin:0;padding:14px 16px;border-bottom:1px solid var(--grid)}
+  .pad{padding:14px 16px}
+  textarea{width:100%;height:360px;background:#0e1525;color:var(--ink);border:1px solid var(--grid);border-radius:10px;padding:12px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace}
+  button{all:unset;background:linear-gradient(90deg,#4aa3ff,#9ae6ff);color:#05213a;font-weight:700;padding:10px 14px;border-radius:10px;cursor:pointer}
+  button:active{transform:translateY(1px)}
+  .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .kpi{background:#0e1525;border:1px solid var(--grid);border-radius:12px;padding:12px}
+  .kpi b{font-size:20px;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{background:#0e1525;border:1px solid var(--grid);border-radius:999px;padding:6px 10px;color:var(--muted)}
+  canvas{width:100%;height:320px;border-radius:12px;background:#0e1525;border:1px solid var(--grid)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .note{color:var(--muted);font-size:12px}
+  .footer{padding:10px 16px;color:var(--muted);border-top:1px solid var(--grid);font-size:12px}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚄 기차 여행 일정</h1>
-            <p>동탄 ↔ 순천 • 2025년 10월 5-6일</p>
-            <div class="current-time" id="currentTime">
-                현재 시각: 로딩 중...
-            </div>
-            <div class="passenger-info">👥 승객 2명</div>
+  <header>
+    <h1>카톡 대화 인포그래픽</h1>
+    <div class="pill">날짜별 발화 · 키워드별 분류</div>
+  </header>
+
+  <main>
+    <!-- 입력 패널 -->
+    <section class="panel">
+      <h2>① 원문 붙여넣기</h2>
+      <div class="pad">
+        <textarea id="raw" placeholder="카카오톡 내보내기 원문을 그대로 붙여넣으세요 (예: 2025년 8월 9일 오전 10:22, 2322동 달토끼 : ... )"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button id="analyze">분석하기</button>
+          <span class="note">포맷 예시: <em>YYYY년 M월 D일 오전/오후 h:mm, 닉네임 : 메시지</em></span>
         </div>
+      </div>
+    </section>
 
-        <div class="journeys-container">
-            <!-- Journey 1: To Suncheon -->
-            <div class="journey-card">
-                <div class="journey-header to-suncheon">
-                    🗓️ 1일차: 순천행 (10월 5일, 토요일)
-                </div>
-                <div class="journey-content">
-                    <!-- Leg 1: SRT -->
-                    <div class="leg srt-leg">
-                        <div class="leg-header">
-                            <div class="train-info">
-                                <div class="train-type">🚄 SRT</div>
-                                <div class="train-number">SRT 665편</div>
-                            </div>
-                            <div class="duration">29분</div>
-                        </div>
-                        <div class="route">
-                            동탄 <span class="route-arrow">→</span> 오송
-                        </div>
-                        <div class="times">
-                            <div class="time-block">
-                                <div class="time-label">출발</div>
-                                <div class="time-value">19:26</div>
-                            </div>
-                            <div class="time-block">
-                                <div class="time-label">도착</div>
-                                <div class="time-value">19:55</div>
-                            </div>
-                        </div>
-                        <div class="seat-info">
-                            <div class="seat-label">🎫 좌석 정보:</div>
-                            <div>11호차 10B, 18호차 3C</div>
-                        </div>
-                        <div class="countdown" id="countdown1">
-                            출발까지: 계산 중...
-                        </div>
-                    </div>
-
-                    <!-- Transfer -->
-                    <div class="transfer">
-                        <div class="transfer-header">
-                            🔄 오송역 환승
-                        </div>
-                        <div class="wait-time">⏱️ 대기시간: 1시간 6분</div>
-                        <div class="transfer-tip">
-                            "역에서 간단한 저녁이나 커피를 마시기에 충분한 시간입니다."
-                        </div>
-                    </div>
-
-                    <!-- Leg 2: KTX -->
-                    <div class="leg ktx-leg">
-                        <div class="leg-header">
-                            <div class="train-info">
-                                <div class="train-type">🚄 KTX</div>
-                                <div class="train-number">KTX 521편</div>
-                            </div>
-                            <div class="duration">1시간 46분</div>
-                        </div>
-                        <div class="route">
-                            오송 <span class="route-arrow">→</span> 순천
-                        </div>
-                        <div class="times">
-                            <div class="time-block">
-                                <div class="time-label">출발</div>
-                                <div class="time-value">21:01</div>
-                            </div>
-                            <div class="time-block">
-                                <div class="time-label">도착</div>
-                                <div class="time-value">22:47</div>
-                            </div>
-                        </div>
-                        <div class="seat-info">
-                            <div class="seat-label">🎫 좌석 정보:</div>
-                            <div>11호차 11B, 17호차 3C</div>
-                        </div>
-                        <div class="countdown" id="countdown2">
-                            출발까지: 계산 중...
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Journey 2: Return -->
-            <div class="journey-card">
-                <div class="journey-header return-home">
-                    🗓️ 2일차: 동탄행 (10월 6일, 일요일)
-                </div>
-                <div class="journey-content">
-                    <!-- Leg 1: KTX -->
-                    <div class="leg ktx-leg">
-                        <div class="leg-header">
-                            <div class="train-info">
-                                <div class="train-type">🚄 KTX-산천</div>
-                                <div class="train-number">KTX-산천 522편</div>
-                            </div>
-                            <div class="duration">1시간 49분</div>
-                        </div>
-                        <div class="route">
-                            순천 <span class="route-arrow">→</span> 오송
-                        </div>
-                        <div class="times">
-                            <div class="time-block">
-                                <div class="time-label">출발</div>
-                                <div class="time-value">20:44</div>
-                            </div>
-                            <div class="time-block">
-                                <div class="time-label">도착</div>
-                                <div class="time-value">22:33</div>
-                            </div>
-                        </div>
-                        <div class="seat-info">
-                            <div class="seat-label">🎫 좌석 정보:</div>
-                            <div>좌석 미정</div>
-                        </div>
-                        <div class="countdown" id="countdown3">
-                            출발까지: 계산 중...
-                        </div>
-                    </div>
-
-                    <!-- Transfer -->
-                    <div class="transfer">
-                        <div class="transfer-header">
-                            🔄 오송역 환승
-                        </div>
-                        <div class="wait-time">⏱️ 대기시간: 1시간 4분</div>
-                        <div class="transfer-tip">
-                            "편의점에서 간식을 사거나 대기실에서 쉬기 좋은 시간입니다."
-                        </div>
-                    </div>
-
-                    <!-- Leg 2: SRT -->
-                    <div class="leg srt-leg">
-                        <div class="leg-header">
-                            <div class="train-info">
-                                <div class="train-type">🚄 SRT</div>
-                                <div class="train-number">SRT 9376편</div>
-                            </div>
-                            <div class="duration">24분</div>
-                        </div>
-                        <div class="route">
-                            오송 <span class="route-arrow">→</span> 동탄
-                        </div>
-                        <div class="times">
-                            <div class="time-block">
-                                <div class="time-label">출발</div>
-                                <div class="time-value">23:37</div>
-                            </div>
-                            <div class="time-block">
-                                <div class="time-label">도착</div>
-                                <div class="time-value">00:01</div>
-                            </div>
-                        </div>
-                        <div class="seat-info">
-                            <div class="seat-label">🎫 좌석 정보:</div>
-                            <div>14호차 8A, 18호차 1B</div>
-                        </div>
-                        <div class="countdown" id="countdown4">
-                            출발까지: 계산 중...
-                        </div>
-                        <div class="midnight-warning">
-                            ⚠️ 10월 7일 월요일 자정 이후 도착
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tips Section -->
-            <div class="tips-section">
-                <div class="tips-header">
-                    ✅ 체크리스트 & 중요 팁
-                </div>
-                
-                <div class="tip-item important">
-                    <div class="tip-title">⭐ 가장 중요:</div>
-                    <div class="tip-content">
-                        자정 이후(00:01 월요일)에 동탄역에 도착하므로 마지막 버스/지하철 시간을 확인하세요. 만약을 대비해 택시 앱을 준비해두세요.
-                    </div>
-                </div>
-
-                <div class="tip-item">
-                    <div class="tip-title">🏢 오송역:</div>
-                    <div class="tip-content">
-                        오송역은 주요 환승 허브로 식당, 카페, 편의점 등 편의시설이 잘 갖춰져 있습니다.
-                    </div>
-                </div>
-
-                <div class="tip-item">
-                    <div class="tip-title">📱 모바일 승차권:</div>
-                    <div class="tip-content">
-                        코레일/SRT 모바일 앱을 이용하면 QR코드로 간편하게 승차할 수 있습니다.
-                    </div>
-                </div>
-            </div>
+    <!-- 결과 패널 -->
+    <section class="panel" style="display:flex;flex-direction:column">
+      <h2>② 결과</h2>
+      <div class="pad">
+        <div class="kpis">
+          <div class="kpi"><span>전체 발화(건)</span><b id="kpi-total">-</b></div>
+          <div class="kpi"><span>참여자(명)</span><b id="kpi-users">-</b></div>
+          <div class="kpi"><span>기간(일)</span><b id="kpi-days">-</b></div>
         </div>
-    </div>
+      </div>
 
-    <script>
-        function updateCurrentTime() {
-            const now = new Date();
-            const options = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            };
-            
-            const timeString = now.toLocaleString('ko-KR', options);
-            document.getElementById('currentTime').textContent = `🕐 현재 시각: ${timeString}`;
-        }
+      <div class="pad">
+        <h3 style="margin:0 0 10px 0;font-size:15px;color:#cfe6ff">A. 날짜별 발화 빈도</h3>
+        <canvas id="chart"></canvas>
+        <div class="legend" id="legend"></div>
+      </div>
 
-        function updateCountdowns() {
-            const now = new Date();
-            
-            // 2025년 기준 출발 시간들
-            const departures = [
-                new Date(2025, 9, 5, 19, 26), // 10월 5일 19:26 (SRT 665)
-                new Date(2025, 9, 5, 21, 1),  // 10월 5일 21:01 (KTX 521)
-                new Date(2025, 9, 6, 20, 44), // 10월 6일 20:44 (KTX-산천 522)
-                new Date(2025, 9, 6, 23, 37)  // 10월 6일 23:37 (SRT 9376)
-            ];
+      <div class="pad">
+        <h3 style="margin:0 0 10px 0;font-size:15px;color:#cfe6ff">B. 키워드 분류(토픽별)</h3>
+        <table id="topic-table">
+          <thead><tr><th>토픽</th><th>키워드</th><th>건수</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
 
-            for (let i = 0; i < departures.length; i++) {
-                const countdown = document.getElementById(`countdown${i + 1}`);
-                const diff = departures[i] - now;
+      <div class="footer">Tip: 입력창에 그대로 붙여넣고 “분석하기”만 누르면 됩니다. (클라이언트 내 연산, 데이터 전송 없음)</div>
+    </section>
+  </main>
 
-                if (diff <= 0) {
-                    countdown.textContent = '출발 완료';
-                    countdown.classList.add('past');
-                } else {
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+<script>
+/* ======== 간단 파서: 카카오 형식 "날짜, 닉네임 : 메시지" ======== */
+function parseLines(text){
+  const lines = text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const items = [];
+  const rx = /^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(오전|오후)\s*(\d{1,2}):(\d{2}),\s*(.+?)\s*:\s*(.+)$/;
+  for(const line of lines){
+    const m = line.match(rx);
+    if(!m) continue;
+    let [_,y,mo,d,ap,h,mi,user,msg] = m;
+    y=+y; mo=+mo; d=+d; h=+h; mi=+mi;
+    if(ap==='오후' && h!==12) h+=12;
+    if(ap==='오전' && h===12) h=0;
+    const dt = new Date(y,mo-1,d,h,mi);
+    const dateKey = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    items.push({dateKey,user,msg,dt});
+  }
+  return items;
+}
 
-                    let countdownText = '출발까지: ';
-                    if (days > 0) countdownText += `${days}일 `;
-                    if (hours > 0) countdownText += `${hours}시간 `;
-                    if (minutes > 0) countdownText += `${minutes}분 `;
-                    countdownText += `${seconds}초`;
+/* ======== 토픽 사전: 키워드 → 토픽 ======== */
+const TOPIC_DEF = [
+  { topic: '시설/헬스장', keys: ['헬스장','런닝머신','트레드밀','에어컨','거치대','패밀리풀','수영','아쿠아슈즈','구명조끼','월패드','공동현관'] },
+  { topic: '나눔/장터', keys: ['나눔','드실분','가져가실분','갠톡','판매','무료','성분표'] },
+  { topic: '과일트럭/상가', keys: ['과일','자두','포도','복숭아','황도','과일트럭','상가','분식집','간판'] },
+  { topic: '의료/병원', keys: ['내과','정형외과','장염','MRI','CT','수액','처방','원장'] },
+  { topic: '교통/단속/사고', keys: ['출차','단속','사고','정체','끼어든','얌체','IC','우회','사이렌'] },
+  { topic: '공지/행사', keys: ['공지','행사','휴장','도서관','수업','프로그램','쿠폰'] },
+  { topic: '기타/잡담', keys: [] }
+];
 
-                    countdown.textContent = countdownText;
-                    countdown.classList.remove('past');
-                }
-            }
-        }
+/* ======== 간단 키워드 매칭 ======== */
+function classifyMessage(msg){
+  const m = msg.toLowerCase();
+  for(const def of TOPIC_DEF){
+    if(def.keys.some(k=> m.includes(k.toLowerCase()))) return def.topic;
+  }
+  return '기타/잡담';
+}
 
-        function updateAll() {
-            updateCurrentTime();
-            updateCountdowns();
-        }
+/* ======== 차트 렌더링 (바닐라 Canvas) ======== */
+function renderBarChart(canvas, labels, values){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const pad = 28, innerW = canvas.clientWidth - pad*2, innerH = canvas.clientHeight - pad*2;
+  const maxV = Math.max(1, Math.max(...values));
+  // grid
+  ctx.fillStyle = '#22304a';
+  for(let i=0;i<=4;i++){
+    const y = pad + innerH - (innerH*i/4);
+    ctx.fillRect(pad, y, innerW, 1);
+  }
+  // bars
+  const bw = innerW / (labels.length*1.2);
+  const gap = bw*0.2;
+  ctx.fillStyle = '#7cc4ff';
+  labels.forEach((lab,i)=>{
+    const v = values[i];
+    const h = (v/maxV)* (innerH-4);
+    const x = pad + i*(bw+gap);
+    const y = pad + innerH - h;
+    ctx.fillRect(x, y, bw, h);
+  });
+  // axes labels
+  ctx.fillStyle = '#9fb1d1'; ctx.font = '12px system-ui';
+  labels.forEach((lab,i)=>{
+    const x = pad + i*(bw+gap) + bw/2;
+    ctx.save(); ctx.translate(x, pad+innerH+14); ctx.rotate(-Math.PI/10);
+    ctx.textAlign = 'center'; ctx.fillText(lab, 0, 0); ctx.restore();
+  });
+}
 
-        // 초기 실행 및 1초마다 업데이트
-        updateAll();
-        setInterval(updateAll, 1000);
-    </script>
+/* ======== 메인 ======== */
+document.getElementById('analyze').addEventListener('click', ()=>{
+  const text = document.getElementById('raw').value;
+  const rows = parseLines(text);
+  if(rows.length===0){ alert('카톡 형식의 줄을 찾지 못했습니다. 예시 형식을 확인하세요.'); return; }
+
+  // KPI
+  const total = rows.length;
+  const users = new Set(rows.map(r=>r.user)).size;
+  const dates = Array.from(new Set(rows.map(r=>r.dateKey))).sort();
+  document.getElementById('kpi-total').textContent = total.toLocaleString('ko-KR');
+  document.getElementById('kpi-users').textContent = users.toLocaleString('ko-KR');
+  document.getElementById('kpi-days').textContent = dates.length.toLocaleString('ko-KR');
+
+  // 날짜별 카운트
+  const byDate = {};
+  rows.forEach(r=> byDate[r.dateKey]=(byDate[r.dateKey]||0)+1 );
+  const labels = Object.keys(byDate).sort();
+  const values = labels.map(k=>byDate[k]);
+
+  // 차트
+  const cvs = document.getElementById('chart');
+  renderBarChart(cvs, labels, values);
+
+  // 키워드 분류
+  const topicCount = {};
+  const topicKeys = {};
+  rows.forEach(r=>{
+    const topic = classifyMessage(r.msg);
+    topicCount[topic] = (topicCount[topic]||0)+1;
+    (topicKeys[topic] ||= new Set());
+    for(const def of TOPIC_DEF){
+      if(def.topic===topic){
+        def.keys.forEach(k=>{ if(k && r.msg.includes(k)) topicKeys[topic].add(k); });
+      }
+    }
+  });
+
+  const tbody = document.querySelector('#topic-table tbody');
+  tbody.innerHTML = '';
+  Object.entries(topicCount)
+    .sort((a,b)=>b[1]-a[1])
+    .forEach(([topic,count])=>{
+      const tr = document.createElement('tr');
+      const keys = topicKeys[topic] ? Array.from(topicKeys[topic]).sort().join(', ') : '';
+      tr.innerHTML = `<td>${topic}</td><td>${keys||'-'}</td><td>${count.toLocaleString('ko-KR')}</td>`;
+      tbody.appendChild(tr);
+    });
+});
+</script>
 </body>
 </html>

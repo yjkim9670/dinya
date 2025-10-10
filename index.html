@@ -3,203 +3,551 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>카톡 대화 인포그래픽 — 날짜별 발화 & 키워드 분류</title>
+<title>디에트르포레 수다방 대화 인텔리전스 대시보드</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <style>
-  :root { --bg:#0b1220; --card:#121a2b; --ink:#e9eefb; --muted:#9fb1d1; --accent:#7cc4ff; --grid:#22304a; }
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,Apple SD Gothic Neo,Malgun Gothic,Arial}
-  header{padding:20px 24px;border-bottom:1px solid var(--grid);display:flex;gap:12px;align-items:center}
-  header h1{font-size:18px;margin:0}
-  main{display:grid;grid-template-columns:420px 1fr;gap:16px;padding:16px}
-  .panel{background:var(--card);border:1px solid var(--grid);border-radius:14px}
-  .panel h2{font-size:14px;color:var(--muted);margin:0;padding:14px 16px;border-bottom:1px solid var(--grid)}
-  .pad{padding:14px 16px}
-  textarea{width:100%;height:360px;background:#0e1525;color:var(--ink);border:1px solid var(--grid);border-radius:10px;padding:12px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace}
-  button{all:unset;background:linear-gradient(90deg,#4aa3ff,#9ae6ff);color:#05213a;font-weight:700;padding:10px 14px;border-radius:10px;cursor:pointer}
-  button:active{transform:translateY(1px)}
-  .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
-  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .kpi{background:#0e1525;border:1px solid var(--grid);border-radius:12px;padding:12px}
-  .kpi b{font-size:20px;display:block}
-  .legend{display:flex;flex-wrap:wrap;gap:8px}
-  .pill{background:#0e1525;border:1px solid var(--grid);border-radius:999px;padding:6px 10px;color:var(--muted)}
-  canvas{width:100%;height:320px;border-radius:12px;background:#0e1525;border:1px solid var(--grid)}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:left}
-  th{color:var(--muted);font-weight:600}
-  .note{color:var(--muted);font-size:12px}
-  .footer{padding:10px 16px;color:var(--muted);border-top:1px solid var(--grid);font-size:12px}
+  :root {
+    color-scheme: dark;
+    --bg: #080f1e;
+    --panel: #111a2d;
+    --border: #243550;
+    --ink: #e9eefb;
+    --muted: #96a7c6;
+    --accent: #7cc4ff;
+    --accent-2: #2ef1b3;
+    --danger: #ff8ea6;
+    --mono: ui-monospace, Menlo, Consolas, 'Apple SD Gothic Neo', monospace;
+    --sans: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(circle at top left, rgba(57,93,153,0.22), transparent 45%), var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 24px clamp(16px, 4vw, 40px) 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 700;
+  }
+  header p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    max-width: 680px;
+  }
+  .layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    gap: 18px;
+    padding: clamp(16px, 4vw, 36px);
+  }
+  aside,
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 18px 40px rgba(3,11,27,0.45);
+  }
+  .panel h2 {
+    margin-top: 0;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    color: #cfe6ff;
+  }
+  .panel h3 {
+    margin-top: 0;
+    font-size: 15px;
+    color: #cfe6ff;
+  }
+  .panel p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .panel a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .panel a:hover {
+    text-decoration: underline;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+  }
+  .kpi {
+    border-radius: 14px;
+    border: 1px solid rgba(127, 203, 255, 0.2);
+    background: linear-gradient(160deg, rgba(124,196,255,0.18), rgba(7,15,31,0.4));
+    padding: 18px;
+  }
+  .kpi .label {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .kpi .value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .kpi .note {
+    color: rgba(233,238,251,0.7);
+    font-size: 12px;
+    margin-top: 8px;
+    display: block;
+  }
+  .chart {
+    width: 100%;
+    height: clamp(260px, 32vw, 420px);
+  }
+  .chart.small {
+    height: clamp(220px, 28vw, 320px);
+  }
+  dl.meta {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+    font-size: 14px;
+  }
+  dl.meta dt {
+    color: var(--muted);
+  }
+  dl.meta dd {
+    margin: 4px 0 0;
+    font-weight: 600;
+  }
+  .preview {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(6,14,28,0.8);
+    border: 1px solid rgba(124,196,255,0.15);
+    border-radius: 12px;
+    padding: 14px;
+    max-height: 220px;
+    overflow: auto;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(124,196,255,0.1);
+    color: var(--accent);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .keyword-timeline {
+    max-height: 360px;
+    overflow: auto;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  details {
+    border: 1px solid rgba(124,196,255,0.18);
+    border-radius: 12px;
+    padding: 10px 14px;
+    background: rgba(9,16,30,0.6);
+  }
+  details summary {
+    cursor: pointer;
+    color: #cfe6ff;
+    font-weight: 600;
+  }
+  details[open] {
+    background: rgba(14,25,46,0.9);
+  }
+  details ul {
+    margin: 12px 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  table.participants {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  table.participants th,
+  table.participants td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  table.participants th {
+    color: var(--muted);
+    text-align: left;
+    font-weight: 500;
+  }
+  .insights-shell {
+    background: rgba(8,13,24,0.7);
+    border-radius: 14px;
+    border: 1px solid rgba(124,196,255,0.12);
+    padding: 18px;
+    max-height: 420px;
+    overflow: auto;
+  }
+  .insights-shell article {
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .insights-shell h2,
+  .insights-shell h3 {
+    margin-top: 18px;
+  }
+  footer {
+    padding: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(233,238,251,0.5);
+  }
+  @media (max-width: 1080px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    aside {
+      order: 2;
+    }
+    main {
+      order: 1;
+    }
+  }
+  @media (max-width: 640px) {
+    header {
+      padding-bottom: 0;
+    }
+    .panel {
+      padding: 18px;
+    }
+    .chart {
+      height: 280px;
+    }
+  }
 </style>
+<script src="data/datasets.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>카톡 대화 인포그래픽</h1>
-    <div class="pill">날짜별 발화 · 키워드별 분류</div>
-  </header>
+<header>
+  <div>
+    <h1>디에트르포레 수다방 대화 인텔리전스 대시보드</h1>
+    <p>카카오톡 오픈채팅방 전체 대화(<span id="header-range"></span>)를 기반으로 날짜·시간대별 발화량, 핵심 키워드, 참여자 활동, 그리고 KOSPI·S&P500 주가지수 흐름을 함께 탐색할 수 있도록 구성한 정적 대시보드입니다. 그래프에 커서를 올리거나 탭을 확장하여 세부 데이터를 확인하세요.</p>
+  </div>
+  <span class="pill">FULL TRANSCRIPT EMBEDDED</span>
+</header>
+
+<div class="layout">
+  <aside>
+    <section class="panel">
+      <h2>데이터 소스 & 연결</h2>
+      <p>원문 전체와 분석 리포트를 HTML로 내장하여 별도 복사 없이 언제든 검토할 수 있습니다.</p>
+      <ul style="margin:12px 0 0; padding-left:18px; color:var(--muted); font-size:14px; line-height:1.6;">
+        <li><a href="conversation_full.html" target="_blank" rel="noopener">대화 원문 전체 보기</a></li>
+        <li><a href="insights.html" target="_blank" rel="noopener">심층 분석 리포트 열기</a></li>
+        <li><a href="#insights">대시보드 내 요약 섹션으로 이동</a></li>
+      </ul>
+    </section>
+    <section class="panel">
+      <h2>기간 요약</h2>
+      <dl class="meta" id="meta"></dl>
+    </section>
+    <section class="panel">
+      <h2>대화 원문 프리뷰</h2>
+      <div class="preview" id="preview"></div>
+      <p style="margin-top:12px; font-size:12px;">전체 원문은 상단 링크를 통해 전용 페이지에서 전문 검색 및 스크롤이 가능합니다.</p>
+    </section>
+    <section class="panel">
+      <h2>주요 참여자 TOP 12</h2>
+      <div id="participants-chart" class="chart small"></div>
+      <table class="participants" id="participants-table">
+        <thead><tr><th>참여자</th><th>발화 수</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </aside>
 
   <main>
-    <!-- 입력 패널 -->
     <section class="panel">
-      <h2>① 원문 붙여넣기</h2>
-      <div class="pad">
-        <textarea id="raw" placeholder="카카오톡 내보내기 원문을 그대로 붙여넣으세요 (예: 2025년 8월 9일 오전 10:22, 2322동 달토끼 : ... )"></textarea>
-        <div class="row" style="margin-top:10px">
-          <button id="analyze">분석하기</button>
-          <span class="note">포맷 예시: <em>YYYY년 M월 D일 오전/오후 h:mm, 닉네임 : 메시지</em></span>
+      <h2>핵심 KPI</h2>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <span class="label">총 메시지</span>
+          <span class="value" id="kpi-total">-</span>
+          <span class="note">전체 대화 건수</span>
+        </div>
+        <div class="kpi">
+          <span class="label">참여자 수</span>
+          <span class="value" id="kpi-users">-</span>
+          <span class="note">고유 닉네임 기준</span>
+        </div>
+        <div class="kpi">
+          <span class="label">활성 일수</span>
+          <span class="value" id="kpi-days">-</span>
+          <span class="note">최소 1건 이상 발화한 날짜</span>
+        </div>
+        <div class="kpi">
+          <span class="label">일 평균 발화</span>
+          <span class="value" id="kpi-average">-</span>
+          <span class="note">총 메시지 ÷ 활성 일수</span>
+        </div>
+        <div class="kpi">
+          <span class="label">최다 발화일</span>
+          <span class="value" id="kpi-busiest">-</span>
+          <span class="note" id="kpi-busiest-note"></span>
+        </div>
+        <div class="kpi">
+          <span class="label">피크 시간대</span>
+          <span class="value" id="kpi-peak-hour">-</span>
+          <span class="note" id="kpi-peak-note"></span>
         </div>
       </div>
     </section>
 
-    <!-- 결과 패널 -->
-    <section class="panel" style="display:flex;flex-direction:column">
-      <h2>② 결과</h2>
-      <div class="pad">
-        <div class="kpis">
-          <div class="kpi"><span>전체 발화(건)</span><b id="kpi-total">-</b></div>
-          <div class="kpi"><span>참여자(명)</span><b id="kpi-users">-</b></div>
-          <div class="kpi"><span>기간(일)</span><b id="kpi-days">-</b></div>
-        </div>
-      </div>
+    <section class="panel">
+      <h2>날짜별 발화량 vs. KOSPI · S&P500</h2>
+      <div id="trend-chart" class="chart" role="img" aria-label="날짜별 메시지 수와 주가지수 추이를 보여주는 복합 그래프"></div>
+      <p>막대는 날짜별 발화 건수, 선 그래프는 동일 날짜의 KOSPI와 S&P500 종가 흐름을 나타냅니다. 포인트를 선택하면 해당 날짜의 키워드와 발화량을 함께 확인할 수 있습니다.</p>
+    </section>
 
-      <div class="pad">
-        <h3 style="margin:0 0 10px 0;font-size:15px;color:#cfe6ff">A. 날짜별 발화 빈도</h3>
-        <canvas id="chart"></canvas>
-        <div class="legend" id="legend"></div>
-      </div>
+    <section class="panel">
+      <h2>시간대별 발화 패턴 (히트맵)</h2>
+      <div id="heatmap-chart" class="chart" role="img" aria-label="날짜와 시간대별 발화량 히트맵"></div>
+      <p>가장 밝은 영역이 집중 발화 시간대를 의미합니다. 회의·공지 등 특정 이벤트가 어느 시간대에 몰리는지 빠르게 파악할 수 있습니다.</p>
+    </section>
 
-      <div class="pad">
-        <h3 style="margin:0 0 10px 0;font-size:15px;color:#cfe6ff">B. 키워드 분류(토픽별)</h3>
-        <table id="topic-table">
-          <thead><tr><th>토픽</th><th>키워드</th><th>건수</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+    <section class="panel">
+      <h2>시간대 누적 발화량</h2>
+      <div id="hourly-chart" class="chart small" role="img" aria-label="시간대별 누적 발화량"></div>
+      <p>하루 중 어느 시간대에 대화가 가장 활발한지 확인하고, 커뮤니티 운영 공지를 송출하기 좋은 타이밍을 도출합니다.</p>
+    </section>
 
-      <div class="footer">Tip: 입력창에 그대로 붙여넣고 “분석하기”만 누르면 됩니다. (클라이언트 내 연산, 데이터 전송 없음)</div>
+    <section class="panel">
+      <h2>핵심 키워드 탐색</h2>
+      <div id="keyword-chart" class="chart small" role="img" aria-label="전체 기간 핵심 키워드 빈도"></div>
+      <div class="keyword-timeline" id="keyword-timeline"></div>
+    </section>
+
+    <section class="panel" id="insights">
+      <h2>심층 분석 요약</h2>
+      <div class="insights-shell" id="insights-shell"></div>
+      <p style="margin-top:12px; font-size:13px;">전체 보고서는 <a href="insights.html" target="_blank" rel="noopener">insights.html</a>에서 별도 페이지로도 확인할 수 있습니다.</p>
     </section>
   </main>
+</div>
+
+<footer>
+  데이터 처리 및 시각화는 모두 클라이언트에서 수행되며, 외부 서버로 전송되지 않습니다.
+</footer>
 
 <script>
-/* ======== 간단 파서: 카카오 형식 "날짜, 닉네임 : 메시지" ======== */
-function parseLines(text){
-  const lines = text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  const items = [];
-  const rx = /^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(오전|오후)\s*(\d{1,2}):(\d{2}),\s*(.+?)\s*:\s*(.+)$/;
-  for(const line of lines){
-    const m = line.match(rx);
-    if(!m) continue;
-    let [_,y,mo,d,ap,h,mi,user,msg] = m;
-    y=+y; mo=+mo; d=+d; h=+h; mi=+mi;
-    if(ap==='오후' && h!==12) h+=12;
-    if(ap==='오전' && h===12) h=0;
-    const dt = new Date(y,mo-1,d,h,mi);
-    const dateKey = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    items.push({dateKey,user,msg,dt});
+window.addEventListener('load', () => {
+  const metrics = window.CONVERSATION_METRICS;
+  const market = window.MARKET_INDICES;
+  const insightsArticle = window.CONVERSATION_INSIGHTS_SECTION;
+  if (!metrics || !market) {
+    console.error('데이터를 불러오지 못했습니다. scripts/build_data.mjs를 먼저 실행하세요.');
+    return;
   }
-  return items;
-}
-
-/* ======== 토픽 사전: 키워드 → 토픽 ======== */
-const TOPIC_DEF = [
-  { topic: '시설/헬스장', keys: ['헬스장','런닝머신','트레드밀','에어컨','거치대','패밀리풀','수영','아쿠아슈즈','구명조끼','월패드','공동현관'] },
-  { topic: '나눔/장터', keys: ['나눔','드실분','가져가실분','갠톡','판매','무료','성분표'] },
-  { topic: '과일트럭/상가', keys: ['과일','자두','포도','복숭아','황도','과일트럭','상가','분식집','간판'] },
-  { topic: '의료/병원', keys: ['내과','정형외과','장염','MRI','CT','수액','처방','원장'] },
-  { topic: '교통/단속/사고', keys: ['출차','단속','사고','정체','끼어든','얌체','IC','우회','사이렌'] },
-  { topic: '공지/행사', keys: ['공지','행사','휴장','도서관','수업','프로그램','쿠폰'] },
-  { topic: '기타/잡담', keys: [] }
-];
-
-/* ======== 간단 키워드 매칭 ======== */
-function classifyMessage(msg){
-  const m = msg.toLowerCase();
-  for(const def of TOPIC_DEF){
-    if(def.keys.some(k=> m.includes(k.toLowerCase()))) return def.topic;
+  const fmt = (n) => n.toLocaleString('ko-KR');
+  const meta = document.getElementById('meta');
+  const summary = metrics.summary;
+  const rangeEl = document.getElementById('header-range');
+  if (rangeEl) {
+    rangeEl.textContent = `${summary.firstDate} ~ ${summary.lastDate}`;
   }
-  return '기타/잡담';
-}
+  const metaHtml = [
+    `<dt>대화 기간</dt><dd>${summary.firstDate} ~ ${summary.lastDate}</dd>`,
+    `<dt>총 메시지</dt><dd>${fmt(summary.totalMessages)}</dd>`,
+    `<dt>참여자</dt><dd>${fmt(summary.totalParticipants)}명</dd>`,
+    `<dt>활성 일수</dt><dd>${fmt(summary.activeDays)}일</dd>`,
+    `<dt>일 평균</dt><dd>${fmt(summary.averagePerDay)}</dd>`,
+    `<dt>최다 발화일</dt><dd>${summary.busiestDate}</dd>`,
+    `<dt>피크 시간대</dt><dd>${summary.peakHour}시</dd>`,
+    `<dt>피크 건수</dt><dd>${fmt(summary.peakHourCount)}</dd>`
+  ].join('');
+  meta.innerHTML = metaHtml;
 
-/* ======== 차트 렌더링 (바닐라 Canvas) ======== */
-function renderBarChart(canvas, labels, values){
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
-  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  const pad = 28, innerW = canvas.clientWidth - pad*2, innerH = canvas.clientHeight - pad*2;
-  const maxV = Math.max(1, Math.max(...values));
-  // grid
-  ctx.fillStyle = '#22304a';
-  for(let i=0;i<=4;i++){
-    const y = pad + innerH - (innerH*i/4);
-    ctx.fillRect(pad, y, innerW, 1);
+  document.getElementById('preview').textContent = metrics.transcriptPreview.join('\n');
+
+  document.getElementById('kpi-total').textContent = fmt(summary.totalMessages);
+  document.getElementById('kpi-users').textContent = fmt(summary.totalParticipants);
+  document.getElementById('kpi-days').textContent = fmt(summary.activeDays);
+  document.getElementById('kpi-average').textContent = fmt(summary.averagePerDay);
+  document.getElementById('kpi-busiest').textContent = summary.busiestDate;
+  document.getElementById('kpi-busiest-note').textContent = `${fmt(summary.busiestCount)}건 기록`;
+  document.getElementById('kpi-peak-hour').textContent = `${summary.peakHour}시`;
+  document.getElementById('kpi-peak-note').textContent = `${fmt(summary.peakHourCount)}건 누적`;
+
+  const participants = metrics.participants.slice(0, 12);
+  const participantNames = participants.map(p => p.user);
+  const participantCounts = participants.map(p => p.count);
+
+  const tableBody = document.querySelector('#participants-table tbody');
+  tableBody.innerHTML = participants.map(p => `<tr><td>${p.user}</td><td>${fmt(p.count)}</td></tr>`).join('');
+
+  function makeChart(el, options) {
+    const chart = echarts.init(el);
+    chart.setOption(options);
+    window.addEventListener('resize', () => chart.resize());
+    return chart;
   }
-  // bars
-  const bw = innerW / (labels.length*1.2);
-  const gap = bw*0.2;
-  ctx.fillStyle = '#7cc4ff';
-  labels.forEach((lab,i)=>{
-    const v = values[i];
-    const h = (v/maxV)* (innerH-4);
-    const x = pad + i*(bw+gap);
-    const y = pad + innerH - h;
-    ctx.fillRect(x, y, bw, h);
+
+  makeChart(document.getElementById('participants-chart'), {
+    tooltip: { trigger: 'item', formatter: '{b}: {c}건' },
+    grid: { left: 80, right: 20, top: 20, bottom: 20 },
+    xAxis: { type: 'value', axisLabel: { color: '#9fb1d1' }, splitLine: { lineStyle: { color: 'rgba(159,177,209,0.1)' } } },
+    yAxis: { type: 'category', data: participantNames.reverse(), axisLabel: { color: '#cfe6ff' } },
+    series: [{
+      type: 'bar',
+      data: participantCounts.reverse(),
+      itemStyle: { color: '#7cc4ff' },
+      label: { show: true, position: 'right', color: '#e9eefb' }
+    }]
   });
-  // axes labels
-  ctx.fillStyle = '#9fb1d1'; ctx.font = '12px system-ui';
-  labels.forEach((lab,i)=>{
-    const x = pad + i*(bw+gap) + bw/2;
-    ctx.save(); ctx.translate(x, pad+innerH+14); ctx.rotate(-Math.PI/10);
-    ctx.textAlign = 'center'; ctx.fillText(lab, 0, 0); ctx.restore();
+
+  const dates = metrics.dailyMessages.map(d => d.date);
+  const messageCounts = metrics.dailyMessages.map(d => d.count);
+  const kospiSeries = market.kospi.map(d => ({ value: [d.date, d.close, d.change] }));
+  const spxSeries = market.spx.map(d => ({ value: [d.date, d.close, d.change] }));
+
+  const keywordLookup = metrics.keywords.byDate;
+  const tooltipFormatter = (params) => {
+    const date = params[0]?.axisValueLabel || params.axisValueLabel || '';
+    const message = params.find(p => p.seriesName === '발화량');
+    const kospiPoint = params.find(p => p.seriesName === 'KOSPI');
+    const spxPoint = params.find(p => p.seriesName === 'S&P500');
+    const keywords = keywordLookup[date] || [];
+    const keywordStr = keywords.length ? keywords.map(k => `${k.keyword} (${k.count})`).join(', ') : '데이터 없음';
+    return `
+      <div style="min-width:220px">
+        <strong>${date}</strong><br />
+        발화량: ${message ? fmt(message.data) : '-'}건<br />
+        KOSPI: ${kospiPoint ? kospiPoint.data[1].toLocaleString('ko-KR') : '-'} (Δ ${kospiPoint ? kospiPoint.data[2].toFixed(2) : '0'})<br />
+        S&P500: ${spxPoint ? spxPoint.data[1].toLocaleString('en-US') : '-'} (Δ ${spxPoint ? spxPoint.data[2].toFixed(2) : '0'})<br />
+        핵심 키워드: ${keywordStr}
+      </div>`;
+  };
+
+  makeChart(document.getElementById('trend-chart'), {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: tooltipFormatter },
+    legend: { data: ['발화량', 'KOSPI', 'S&P500'], textStyle: { color: '#cfe6ff' } },
+    grid: { top: 50, left: 60, right: 70, bottom: 60 },
+    xAxis: { type: 'category', data: dates, axisLabel: { color: '#9fb1d1', rotate: 45 } },
+    yAxis: [
+      { type: 'value', name: '발화량', position: 'left', axisLabel: { color: '#9fb1d1' }, splitLine: { lineStyle: { color: 'rgba(159,177,209,0.08)' } } },
+      { type: 'value', name: '지수', position: 'right', axisLabel: { color: '#9fb1d1' }, splitLine: { show: false } }
+    ],
+    dataZoom: [
+      { type: 'slider', start: 0, end: 100, bottom: 10, textStyle: { color: '#cfe6ff' } },
+      { type: 'inside' }
+    ],
+    series: [
+      { name: '발화량', type: 'bar', data: messageCounts, itemStyle: { color: '#7cc4ff' }, emphasis: { focus: 'series' } },
+      { name: 'KOSPI', type: 'line', yAxisIndex: 1, data: kospiSeries.map(d => d.value), smooth: true, itemStyle: { color: '#2ef1b3' } },
+      { name: 'S&P500', type: 'line', yAxisIndex: 1, data: spxSeries.map(d => d.value), smooth: true, itemStyle: { color: '#ffb37a' } }
+    ]
   });
-}
 
-/* ======== 메인 ======== */
-document.getElementById('analyze').addEventListener('click', ()=>{
-  const text = document.getElementById('raw').value;
-  const rows = parseLines(text);
-  if(rows.length===0){ alert('카톡 형식의 줄을 찾지 못했습니다. 예시 형식을 확인하세요.'); return; }
+  const heatmapDates = dates;
+  const hours = Array.from({ length: 24 }, (_, i) => `${i}시`);
+  const heatmapData = metrics.heatmap.map(item => [heatmapDates.indexOf(item.date), item.hour, item.value]);
 
-  // KPI
-  const total = rows.length;
-  const users = new Set(rows.map(r=>r.user)).size;
-  const dates = Array.from(new Set(rows.map(r=>r.dateKey))).sort();
-  document.getElementById('kpi-total').textContent = total.toLocaleString('ko-KR');
-  document.getElementById('kpi-users').textContent = users.toLocaleString('ko-KR');
-  document.getElementById('kpi-days').textContent = dates.length.toLocaleString('ko-KR');
-
-  // 날짜별 카운트
-  const byDate = {};
-  rows.forEach(r=> byDate[r.dateKey]=(byDate[r.dateKey]||0)+1 );
-  const labels = Object.keys(byDate).sort();
-  const values = labels.map(k=>byDate[k]);
-
-  // 차트
-  const cvs = document.getElementById('chart');
-  renderBarChart(cvs, labels, values);
-
-  // 키워드 분류
-  const topicCount = {};
-  const topicKeys = {};
-  rows.forEach(r=>{
-    const topic = classifyMessage(r.msg);
-    topicCount[topic] = (topicCount[topic]||0)+1;
-    (topicKeys[topic] ||= new Set());
-    for(const def of TOPIC_DEF){
-      if(def.topic===topic){
-        def.keys.forEach(k=>{ if(k && r.msg.includes(k)) topicKeys[topic].add(k); });
+  makeChart(document.getElementById('heatmap-chart'), {
+    tooltip: {
+      position: 'top',
+      formatter: (params) => {
+        const [xIdx, hour, value] = params.data;
+        const date = heatmapDates[xIdx];
+        return `${date} ${hour}시<br/>발화 ${fmt(value)}건`;
       }
-    }
+    },
+    grid: { top: 40, right: 20, left: 70, bottom: 40 },
+    xAxis: { type: 'category', data: heatmapDates, splitArea: { show: true }, axisLabel: { color: '#9fb1d1', rotate: 45 } },
+    yAxis: { type: 'category', data: hours, splitArea: { show: true }, axisLabel: { color: '#9fb1d1' } },
+    visualMap: {
+      min: 0,
+      max: Math.max(...metrics.heatmap.map(h => h.value)),
+      calculable: true,
+      orient: 'horizontal',
+      left: 'center',
+      bottom: 10,
+      textStyle: { color: '#cfe6ff' },
+      inRange: { color: ['#0d1b2f', '#1f3c6d', '#61a0ff', '#d3f6ff'] }
+    },
+    series: [{
+      name: '발화 히트맵',
+      type: 'heatmap',
+      data: heatmapData,
+      label: { show: false }
+    }]
   });
 
-  const tbody = document.querySelector('#topic-table tbody');
-  tbody.innerHTML = '';
-  Object.entries(topicCount)
-    .sort((a,b)=>b[1]-a[1])
-    .forEach(([topic,count])=>{
-      const tr = document.createElement('tr');
-      const keys = topicKeys[topic] ? Array.from(topicKeys[topic]).sort().join(', ') : '';
-      tr.innerHTML = `<td>${topic}</td><td>${keys||'-'}</td><td>${count.toLocaleString('ko-KR')}</td>`;
-      tbody.appendChild(tr);
-    });
+  makeChart(document.getElementById('hourly-chart'), {
+    tooltip: { trigger: 'axis', formatter: (params) => `${params[0].axisValue}시 : ${fmt(params[0].data)}건` },
+    grid: { top: 40, left: 50, right: 20, bottom: 40 },
+    xAxis: { type: 'category', data: metrics.hourlyTotals.map(h => `${h.hour}시`), axisLabel: { color: '#9fb1d1' } },
+    yAxis: { type: 'value', axisLabel: { color: '#9fb1d1' }, splitLine: { lineStyle: { color: 'rgba(159,177,209,0.1)' } } },
+    series: [{
+      data: metrics.hourlyTotals.map(h => h.count),
+      type: 'line',
+      smooth: true,
+      areaStyle: { color: 'rgba(124,196,255,0.25)' },
+      itemStyle: { color: '#7cc4ff' }
+    }]
+  });
+
+  const keywordSeries = metrics.keywords.overall.map(k => ({ name: k.keyword, value: k.count }));
+  makeChart(document.getElementById('keyword-chart'), {
+    tooltip: { trigger: 'item', formatter: ({ name, value }) => `${name}: ${fmt(value)}회` },
+    grid: { top: 20, bottom: 0, left: 0, right: 0 },
+    series: [{
+      name: '키워드',
+      type: 'treemap',
+      roam: false,
+      nodeClick: false,
+      breadcrumb: { show: false },
+      data: keywordSeries.map(item => ({ name: item.name, value: item.value, itemStyle: { color: `rgba(${80 + (Math.random()*80)|0}, ${140 + (Math.random()*60)|0}, 255, 0.8)` } })),
+      label: { color: '#0b1220', fontWeight: '600', overflow: 'truncate' }
+    }]
+  });
+
+  const timeline = document.getElementById('keyword-timeline');
+  const timelineDates = Object.keys(metrics.keywords.byDate).sort();
+  timeline.innerHTML = timelineDates.map(date => {
+    const list = metrics.keywords.byDate[date];
+    const items = list && list.length ? list.map(item => `<li>${item.keyword} — ${fmt(item.count)}회</li>`).join('') : '<li>주요 키워드 데이터 없음</li>';
+    return `<details><summary>${date}</summary><ul>${items}</ul></details>`;
+  }).join('');
+
+  const insightsShell = document.getElementById('insights-shell');
+  insightsShell.innerHTML = insightsArticle;
 });
 </script>
 </body>

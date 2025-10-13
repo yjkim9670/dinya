@@ -1,0 +1,167 @@
+{
+  "generated_at": "2024-06-01T00:00:00Z",
+  "tickers": [
+    {
+      "symbol": "005930.KS",
+      "name": "삼성전자",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        { "timestamp": "2024-05-20T00:00:00Z", "open": 76000, "high": 76800, "low": 75800, "close": 76600, "volume": 1320000 },
+        { "timestamp": "2024-05-21T00:00:00Z", "open": 76600, "high": 77200, "low": 76400, "close": 77000, "volume": 1184000 },
+        { "timestamp": "2024-05-22T00:00:00Z", "open": 77000, "high": 77500, "low": 76800, "close": 77300, "volume": 1256000 },
+        { "timestamp": "2024-05-23T00:00:00Z", "open": 77300, "high": 77800, "low": 77100, "close": 77600, "volume": 1203000 },
+        { "timestamp": "2024-05-24T00:00:00Z", "open": 77600, "high": 78100, "low": 77400, "close": 77950, "volume": 1278000 },
+        { "timestamp": "2024-05-27T00:00:00Z", "open": 77900, "high": 78300, "low": 77600, "close": 78000, "volume": 1294000 },
+        { "timestamp": "2024-05-28T00:00:00Z", "open": 78000, "high": 78600, "low": 77800, "close": 78400, "volume": 1332000 },
+        { "timestamp": "2024-05-29T00:00:00Z", "open": 78400, "high": 78900, "low": 78200, "close": 78750, "volume": 1217000 },
+        { "timestamp": "2024-05-30T00:00:00Z", "open": 78700, "high": 79200, "low": 78500, "close": 79000, "volume": 1286000 },
+        { "timestamp": "2024-05-31T00:00:00Z", "open": 79000, "high": 79400, "low": 78800, "close": 79250, "volume": 1198000 }
+      ],
+      "indicators": {
+        "sma5": 78660.0,
+        "sma20": 77385.0,
+        "rsi14": 62.4,
+        "stochastic": { "k": 78.5, "d": 72.1, "k_period": 14, "d_period": 3, "smooth": 3 },
+        "macd": { "macd": 580.2, "signal": 482.7, "histogram": 97.5, "fast": 12, "slow": 26, "signal_period": 9 }
+      },
+      "signals": {
+        "trend": "bullish",
+        "rsi": "hold",
+        "stochastic": "sell",
+        "macd": "bullish"
+      },
+      "news": [
+        {
+          "title": "삼성전자, 차세대 HBM 라인 증설 계획 발표",
+          "publisher": "연합뉴스",
+          "link": "https://example.com/news/samsung-hbm-plan",
+          "published_at": "2024-05-31T07:00:00Z"
+        },
+        {
+          "title": "삼성전자 주가, AI 수요 기대감에 8만선 회복",
+          "publisher": "한국경제",
+          "link": "https://example.com/news/samsung-ai-demand",
+          "published_at": "2024-05-31T05:30:00Z"
+        }
+      ]
+    },
+    {
+      "symbol": "000660.KS",
+      "name": "SK하이닉스",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        { "timestamp": "2024-05-20T00:00:00Z", "open": 168000, "high": 171000, "low": 167500, "close": 170500, "volume": 956000 },
+        { "timestamp": "2024-05-21T00:00:00Z", "open": 170500, "high": 173000, "low": 170000, "close": 172800, "volume": 1023000 },
+        { "timestamp": "2024-05-22T00:00:00Z", "open": 172800, "high": 176000, "low": 172500, "close": 175600, "volume": 1105000 },
+        { "timestamp": "2024-05-23T00:00:00Z", "open": 175600, "high": 177000, "low": 174500, "close": 176800, "volume": 1002000 },
+        { "timestamp": "2024-05-24T00:00:00Z", "open": 176800, "high": 178400, "low": 175600, "close": 177900, "volume": 978000 },
+        { "timestamp": "2024-05-27T00:00:00Z", "open": 178000, "high": 179500, "low": 176800, "close": 178200, "volume": 942000 },
+        { "timestamp": "2024-05-28T00:00:00Z", "open": 178200, "high": 180600, "low": 177500, "close": 179800, "volume": 989000 },
+        { "timestamp": "2024-05-29T00:00:00Z", "open": 179800, "high": 182000, "low": 179200, "close": 181500, "volume": 1014000 },
+        { "timestamp": "2024-05-30T00:00:00Z", "open": 181500, "high": 183000, "low": 180800, "close": 182200, "volume": 954000 },
+        { "timestamp": "2024-05-31T00:00:00Z", "open": 182200, "high": 184200, "low": 181500, "close": 183600, "volume": 912000 }
+      ],
+      "indicators": {
+        "sma5": 181060.0,
+        "sma20": 175940.0,
+        "rsi14": 68.9,
+        "stochastic": { "k": 82.4, "d": 79.6, "k_period": 14, "d_period": 3, "smooth": 3 },
+        "macd": { "macd": 1450.7, "signal": 1320.4, "histogram": 130.3, "fast": 12, "slow": 26, "signal_period": 9 }
+      },
+      "signals": {
+        "trend": "bullish",
+        "rsi": "sell",
+        "stochastic": "sell",
+        "macd": "bullish"
+      },
+      "news": [
+        {
+          "title": "SK하이닉스, HBM4 개발 로드맵 공개",
+          "publisher": "머니투데이",
+          "link": "https://example.com/news/skhynix-hbm4",
+          "published_at": "2024-05-31T06:40:00Z"
+        }
+      ]
+    },
+    {
+      "symbol": "360750.KS",
+      "name": "TIGER S&P500",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        { "timestamp": "2024-05-20T00:00:00Z", "open": 15040, "high": 15120, "low": 15020, "close": 15080, "volume": 452000 },
+        { "timestamp": "2024-05-21T00:00:00Z", "open": 15080, "high": 15160, "low": 15060, "close": 15140, "volume": 438000 },
+        { "timestamp": "2024-05-22T00:00:00Z", "open": 15140, "high": 15240, "low": 15100, "close": 15210, "volume": 461000 },
+        { "timestamp": "2024-05-23T00:00:00Z", "open": 15210, "high": 15300, "low": 15180, "close": 15280, "volume": 420000 },
+        { "timestamp": "2024-05-24T00:00:00Z", "open": 15280, "high": 15340, "low": 15240, "close": 15320, "volume": 415000 },
+        { "timestamp": "2024-05-27T00:00:00Z", "open": 15320, "high": 15380, "low": 15290, "close": 15350, "volume": 398000 },
+        { "timestamp": "2024-05-28T00:00:00Z", "open": 15350, "high": 15420, "low": 15310, "close": 15390, "volume": 412000 },
+        { "timestamp": "2024-05-29T00:00:00Z", "open": 15390, "high": 15480, "low": 15370, "close": 15440, "volume": 406000 },
+        { "timestamp": "2024-05-30T00:00:00Z", "open": 15440, "high": 15520, "low": 15410, "close": 15480, "volume": 377000 },
+        { "timestamp": "2024-05-31T00:00:00Z", "open": 15480, "high": 15560, "low": 15460, "close": 15520, "volume": 389000 }
+      ],
+      "indicators": {
+        "sma5": 15456.0,
+        "sma20": 15264.0,
+        "rsi14": 59.2,
+        "stochastic": { "k": 74.8, "d": 70.3, "k_period": 14, "d_period": 3, "smooth": 3 },
+        "macd": { "macd": 52.6, "signal": 44.1, "histogram": 8.5, "fast": 12, "slow": 26, "signal_period": 9 }
+      },
+      "signals": {
+        "trend": "bullish",
+        "rsi": "hold",
+        "stochastic": "hold",
+        "macd": "bullish"
+      },
+      "news": [
+        {
+          "title": "S&P500, 기술주 강세에 또 사상 최고",
+          "publisher": "Bloomberg",
+          "link": "https://example.com/news/sp500-record",
+          "published_at": "2024-05-31T03:10:00Z"
+        }
+      ]
+    },
+    {
+      "symbol": "133690.KS",
+      "name": "TIGER 나스닥100",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        { "timestamp": "2024-05-20T00:00:00Z", "open": 16000, "high": 16120, "low": 15960, "close": 16080, "volume": 385000 },
+        { "timestamp": "2024-05-21T00:00:00Z", "open": 16080, "high": 16200, "low": 16040, "close": 16190, "volume": 392000 },
+        { "timestamp": "2024-05-22T00:00:00Z", "open": 16190, "high": 16340, "low": 16160, "close": 16280, "volume": 401000 },
+        { "timestamp": "2024-05-23T00:00:00Z", "open": 16280, "high": 16410, "low": 16240, "close": 16370, "volume": 396000 },
+        { "timestamp": "2024-05-24T00:00:00Z", "open": 16370, "high": 16490, "low": 16340, "close": 16450, "volume": 388000 },
+        { "timestamp": "2024-05-27T00:00:00Z", "open": 16450, "high": 16530, "low": 16410, "close": 16480, "volume": 374000 },
+        { "timestamp": "2024-05-28T00:00:00Z", "open": 16480, "high": 16620, "low": 16440, "close": 16590, "volume": 389000 },
+        { "timestamp": "2024-05-29T00:00:00Z", "open": 16590, "high": 16680, "low": 16540, "close": 16630, "volume": 371000 },
+        { "timestamp": "2024-05-30T00:00:00Z", "open": 16630, "high": 16740, "low": 16580, "close": 16710, "volume": 364000 },
+        { "timestamp": "2024-05-31T00:00:00Z", "open": 16710, "high": 16820, "low": 16670, "close": 16790, "volume": 356000 }
+      ],
+      "indicators": {
+        "sma5": 16660.0,
+        "sma20": 16345.0,
+        "rsi14": 63.5,
+        "stochastic": { "k": 76.1, "d": 71.4, "k_period": 14, "d_period": 3, "smooth": 3 },
+        "macd": { "macd": 68.4, "signal": 60.2, "histogram": 8.2, "fast": 12, "slow": 26, "signal_period": 9 }
+      },
+      "signals": {
+        "trend": "bullish",
+        "rsi": "hold",
+        "stochastic": "hold",
+        "macd": "bullish"
+      },
+      "news": [
+        {
+          "title": "나스닥100, AI 대형주 강세에 52주 신고가",
+          "publisher": "CNBC",
+          "link": "https://example.com/news/nasdaq-ai-rally",
+          "published_at": "2024-05-31T02:40:00Z"
+        }
+      ]
+    }
+  ]
+}

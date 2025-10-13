@@ -1,0 +1,271 @@
+{
+  "generated_at": "2024-06-01T00:00:00Z",
+  "tickers": [
+    {
+      "symbol": "005930.KS",
+      "name": "삼성전자",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        {
+          "timestamp": "2024-05-31T00:00:00Z",
+          "open": 76800,
+          "high": 77000,
+          "low": 76400,
+          "close": 76900,
+          "volume": 102938
+        },
+        {
+          "timestamp": "2024-05-31T00:10:00Z",
+          "open": 76900,
+          "high": 77300,
+          "low": 76800,
+          "close": 77200,
+          "volume": 98234
+        },
+        {
+          "timestamp": "2024-05-31T00:20:00Z",
+          "open": 77200,
+          "high": 77400,
+          "low": 77100,
+          "close": 77350,
+          "volume": 87543
+        },
+        {
+          "timestamp": "2024-05-31T00:30:00Z",
+          "open": 77350,
+          "high": 77600,
+          "low": 77250,
+          "close": 77500,
+          "volume": 84520
+        },
+        {
+          "timestamp": "2024-05-31T00:40:00Z",
+          "open": 77500,
+          "high": 77800,
+          "low": 77450,
+          "close": 77700,
+          "volume": 90542
+        }
+      ],
+      "indicators": {
+        "sma5": 77350,
+        "sma20": 76840,
+        "rsi14": 62.4
+      },
+      "signals": {
+        "trend": "bullish",
+        "momentum": "neutral"
+      },
+      "news": [
+        {
+          "title": "삼성전자, 차세대 반도체 로드맵 공개",
+          "publisher": "연합뉴스",
+          "link": "https://example.com/news/samsung-20240601",
+          "published_at": "2024-05-31T07:00:00Z"
+        },
+        {
+          "title": "AI 서버 수요 확대에 따른 투자 전망",
+          "publisher": "한국경제",
+          "link": "https://example.com/news/samsung-ai",
+          "published_at": "2024-05-31T05:30:00Z"
+        }
+      ]
+    },
+    {
+      "symbol": "000660.KS",
+      "name": "SK하이닉스",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        {
+          "timestamp": "2024-05-31T00:00:00Z",
+          "open": 176000,
+          "high": 176500,
+          "low": 175000,
+          "close": 175500,
+          "volume": 50932
+        },
+        {
+          "timestamp": "2024-05-31T00:10:00Z",
+          "open": 175500,
+          "high": 176800,
+          "low": 175200,
+          "close": 176600,
+          "volume": 47200
+        },
+        {
+          "timestamp": "2024-05-31T00:20:00Z",
+          "open": 176600,
+          "high": 177200,
+          "low": 176000,
+          "close": 176900,
+          "volume": 45210
+        },
+        {
+          "timestamp": "2024-05-31T00:30:00Z",
+          "open": 176900,
+          "high": 177500,
+          "low": 176400,
+          "close": 177300,
+          "volume": 44820
+        },
+        {
+          "timestamp": "2024-05-31T00:40:00Z",
+          "open": 177300,
+          "high": 178000,
+          "low": 176800,
+          "close": 177800,
+          "volume": 43950
+        }
+      ],
+      "indicators": {
+        "sma5": 176820,
+        "sma20": 175950,
+        "rsi14": 68.1
+      },
+      "signals": {
+        "trend": "bullish",
+        "momentum": "neutral"
+      },
+      "news": [
+        {
+          "title": "HBM 수요 증가로 실적 기대감",
+          "publisher": "머니투데이",
+          "link": "https://example.com/news/skhynix-hbm",
+          "published_at": "2024-05-31T06:40:00Z"
+        }
+      ]
+    },
+    {
+      "symbol": "360750.KS",
+      "name": "TIGER S&P500",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        {
+          "timestamp": "2024-05-31T00:00:00Z",
+          "open": 15500,
+          "high": 15520,
+          "low": 15480,
+          "close": 15510,
+          "volume": 18200
+        },
+        {
+          "timestamp": "2024-05-31T00:10:00Z",
+          "open": 15510,
+          "high": 15560,
+          "low": 15500,
+          "close": 15540,
+          "volume": 17680
+        },
+        {
+          "timestamp": "2024-05-31T00:20:00Z",
+          "open": 15540,
+          "high": 15580,
+          "low": 15530,
+          "close": 15560,
+          "volume": 16540
+        },
+        {
+          "timestamp": "2024-05-31T00:30:00Z",
+          "open": 15560,
+          "high": 15590,
+          "low": 15540,
+          "close": 15580,
+          "volume": 15300
+        },
+        {
+          "timestamp": "2024-05-31T00:40:00Z",
+          "open": 15580,
+          "high": 15610,
+          "low": 15570,
+          "close": 15590,
+          "volume": 14820
+        }
+      ],
+      "indicators": {
+        "sma5": 15556,
+        "sma20": 15510,
+        "rsi14": 58.7
+      },
+      "signals": {
+        "trend": "bullish",
+        "momentum": "neutral"
+      },
+      "news": [
+        {
+          "title": "S&P500, 기술주 상승에 사상 최고 경신",
+          "publisher": "Bloomberg",
+          "link": "https://example.com/news/sp500-record",
+          "published_at": "2024-05-31T04:20:00Z"
+        }
+      ]
+    },
+    {
+      "symbol": "133690.KS",
+      "name": "TIGER 나스닥100",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        {
+          "timestamp": "2024-05-31T00:00:00Z",
+          "open": 72000,
+          "high": 72150,
+          "low": 71850,
+          "close": 72080,
+          "volume": 21400
+        },
+        {
+          "timestamp": "2024-05-31T00:10:00Z",
+          "open": 72080,
+          "high": 72300,
+          "low": 72000,
+          "close": 72250,
+          "volume": 20440
+        },
+        {
+          "timestamp": "2024-05-31T00:20:00Z",
+          "open": 72250,
+          "high": 72400,
+          "low": 72150,
+          "close": 72340,
+          "volume": 19750
+        },
+        {
+          "timestamp": "2024-05-31T00:30:00Z",
+          "open": 72340,
+          "high": 72500,
+          "low": 72220,
+          "close": 72480,
+          "volume": 18890
+        },
+        {
+          "timestamp": "2024-05-31T00:40:00Z",
+          "open": 72480,
+          "high": 72620,
+          "low": 72400,
+          "close": 72550,
+          "volume": 18030
+        }
+      ],
+      "indicators": {
+        "sma5": 72324,
+        "sma20": 72080,
+        "rsi14": 64.3
+      },
+      "signals": {
+        "trend": "bullish",
+        "momentum": "neutral"
+      },
+      "news": [
+        {
+          "title": "나스닥100, 빅테크 강세로 상승 마감",
+          "publisher": "CNBC",
+          "link": "https://example.com/news/nasdaq-rally",
+          "published_at": "2024-05-31T03:55:00Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,26 @@
 const DATA_URL = 'data/latest.json';
 const dashboard = document.getElementById('dashboard');
+const categoryNav = document.getElementById('category-nav');
 const lastUpdated = document.getElementById('last-updated');
+
+const CATEGORY_DEFINITIONS = [
+  {
+    id: 'stocks',
+    label: '국내 대표주',
+    description: '삼성전자와 SK하이닉스 중심의 국내 주도주 흐름을 모니터링합니다.',
+    symbols: ['005930.KS', '000660.KS'],
+  },
+  {
+    id: 'etfs',
+    label: '글로벌 ETF',
+    description: 'TIGER S&P500과 TIGER 나스닥100 ETF를 통해 해외 증시 트렌드를 추적합니다.',
+    symbols: ['360750.KS', '133690.KS'],
+  },
+];
+
+let activeCategory = CATEGORY_DEFINITIONS[0]?.id ?? null;
+let renderedCategories = [...CATEGORY_DEFINITIONS];
+const categoryPanels = new Map();
 
 const priceFormatters = new Map();
 const numberFormatter = new Intl.NumberFormat('ko-KR', {
@@ -69,6 +89,22 @@ function ensurePriceFormatter(currency) {
   return priceFormatters.get(currency);
 }
 
+function groupTickers(tickers = []) {
+  const grouped = new Map(CATEGORY_DEFINITIONS.map((category) => [category.id, []]));
+  const uncategorized = [];
+
+  tickers.forEach((ticker) => {
+    const category = CATEGORY_DEFINITIONS.find((entry) => entry.symbols.includes(ticker.symbol));
+    if (category) {
+      grouped.get(category.id)?.push(ticker);
+    } else {
+      uncategorized.push(ticker);
+    }
+  });
+
+  return { grouped, uncategorized };
+}
+
 function createCard(ticker) {
   const card = document.createElement('article');
   card.className = 'card';
@@ -113,9 +149,7 @@ function createCard(ticker) {
     {
       label: '현재가',
       value:
-        latest?.close != null
-          ? priceFormatter.format(latest.close)
-          : '데이터 없음',
+        latest?.close != null ? priceFormatter.format(latest.close) : '데이터 없음',
       className: change != null ? (change >= 0 ? 'positive' : 'negative') : undefined,
     },
     {
@@ -260,8 +294,8 @@ function renderChart(canvas, ticker) {
           label: '종가',
           data,
           fill: false,
-          borderColor: '#22d3ee',
-          backgroundColor: 'rgba(34, 211, 238, 0.2)',
+          borderColor: '#2f81f7',
+          backgroundColor: 'rgba(47, 129, 247, 0.18)',
           tension: 0.35,
           borderWidth: 2,
           pointRadius: 0,
@@ -275,25 +309,25 @@ function renderChart(canvas, ticker) {
         x: {
           type: 'time',
           ticks: {
-            color: 'rgba(226, 232, 240, 0.65)',
+            color: 'rgba(240, 246, 252, 0.65)',
           },
           time: {
             tooltipFormat: 'yyyy-MM-dd HH:mm',
           },
           grid: {
-            color: 'rgba(148, 163, 184, 0.12)',
+            color: 'rgba(48, 54, 61, 0.5)',
           },
         },
         y: {
           ticks: {
-            color: 'rgba(226, 232, 240, 0.65)',
+            color: 'rgba(240, 246, 252, 0.65)',
             callback(value) {
               const formatter = ensurePriceFormatter(ticker.currency || 'KRW');
               return formatter.format(value);
             },
           },
           grid: {
-            color: 'rgba(148, 163, 184, 0.12)',
+            color: 'rgba(48, 54, 61, 0.35)',
           },
         },
       },
@@ -328,12 +362,115 @@ function formatRelativeTime(isoString) {
   return `${days}일 전`;
 }
 
-function renderDashboard(snapshot) {
+function buildPanels(grouped, categories) {
+  categoryPanels.clear();
   dashboard.innerHTML = '';
 
-  snapshot.tickers?.forEach((ticker) => {
-    dashboard.appendChild(createCard(ticker));
+  categories.forEach((category) => {
+    const panel = document.createElement('section');
+    panel.className = 'category-panel';
+    panel.dataset.category = category.id;
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', `${category.id}-tab`);
+
+    const panelHeader = document.createElement('div');
+    panelHeader.className = 'panel-header';
+    const title = document.createElement('h2');
+    title.textContent = category.label;
+    const description = document.createElement('p');
+    description.textContent = category.description;
+    panelHeader.append(title, description);
+
+    const entries = grouped.get(category.id) ?? [];
+
+    panel.appendChild(panelHeader);
+
+    if (entries.length > 0) {
+      const grid = document.createElement('div');
+      grid.className = 'panel-grid';
+      entries.forEach((ticker) => {
+        grid.appendChild(createCard(ticker));
+      });
+      panel.appendChild(grid);
+    } else {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = '표시할 종목이 없습니다.';
+      panel.appendChild(empty);
+    }
+
+    dashboard.appendChild(panel);
+    categoryPanels.set(category.id, panel);
   });
+}
+
+function buildNav(categories, grouped) {
+  categoryNav.innerHTML = '';
+
+  categories.forEach((category) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'tab-button';
+    button.id = `${category.id}-tab`;
+    button.setAttribute('role', 'tab');
+    button.dataset.category = category.id;
+    const count = grouped.get(category.id)?.length ?? 0;
+    button.innerHTML = `
+      <span>${category.label}</span>
+      <span class="tab-meta">${count}종목</span>
+    `;
+    button.addEventListener('click', () => setActiveCategory(category.id));
+    categoryNav.appendChild(button);
+  });
+}
+
+function applyActiveCategory() {
+  const buttons = categoryNav.querySelectorAll('.tab-button');
+  buttons.forEach((button) => {
+    const isActive = button.dataset.category === activeCategory;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-selected', String(isActive));
+    button.setAttribute('tabindex', isActive ? '0' : '-1');
+  });
+
+  categoryPanels.forEach((panel, categoryId) => {
+    const isActive = categoryId === activeCategory;
+    panel.classList.toggle('active', isActive);
+    panel.hidden = !isActive;
+    panel.setAttribute('aria-hidden', String(!isActive));
+  });
+}
+
+function setActiveCategory(categoryId) {
+  if (!categoryPanels.has(categoryId)) {
+    return;
+  }
+  activeCategory = categoryId;
+  applyActiveCategory();
+}
+
+function renderDashboard(snapshot) {
+  const { grouped, uncategorized } = groupTickers(snapshot.tickers);
+
+  renderedCategories = [...CATEGORY_DEFINITIONS];
+  if (uncategorized.length > 0) {
+    const fallbackId = 'others';
+    grouped.set(fallbackId, uncategorized);
+    renderedCategories.push({
+      id: fallbackId,
+      label: '기타 자산',
+      description: '사전 정의되지 않은 종목이 자동으로 분류됩니다.',
+      symbols: [],
+    });
+  }
+
+  if (!renderedCategories.some((category) => category.id === activeCategory)) {
+    activeCategory = renderedCategories[0]?.id ?? null;
+  }
+
+  buildPanels(grouped, renderedCategories);
+  buildNav(renderedCategories, grouped);
+  applyActiveCategory();
 
   if (snapshot.generated_at) {
     const generated = new Date(snapshot.generated_at);
@@ -345,6 +482,10 @@ function renderDashboard(snapshot) {
 
 function renderError(message) {
   dashboard.innerHTML = '';
+  categoryNav.innerHTML = '';
+  categoryPanels.clear();
+  activeCategory = null;
+
   const errorCard = document.createElement('article');
   errorCard.className = 'card';
   const header = document.createElement('div');

@@ -1,93 +1,66 @@
-# Korean Market Monitoring Dashboard
+# 한국 증시 모니터링 대시보드
 
-This repository hosts a GitHub Pages friendly dashboard for tracking leading Korean equities and exchange-traded funds (ETFs). The focus is on:
+이 저장소는 GitHub Pages로 배포되는 한국 대표 종목/ETF 모니터링 대시보드를 제공합니다. 삼성전자와 SK하이닉스, TIGER S&P500, TIGER 나스닥100의 가격 흐름과 대표 지표, 매수·매도 시그널, 최신 뉴스를 한 화면에서 확인할 수 있도록 구성했습니다. 데이터는 GitHub Actions 자동화로 주기적으로 갱신됩니다.
 
-- **Samsung Electronics (KRX:005930)**
-- **SK hynix (KRX:000660)**
-- **TIGER S&P500 ETF (KRX:360750)**
-- **TIGER NASDAQ 100 ETF (KRX:133690)**
+## 주요 기능
 
-The site aggregates near real-time price history, common indicators, simple trading signals, and links to the latest news stories so that everything is visible at a glance.
+- **분류 탭**: 상단 탭에서 `국내 대표주(삼성전자·SK하이닉스)`와 `글로벌 ETF(TIGER S&P500·TIGER 나스닥100)`를 전환할 수 있습니다.
+- **가격 및 지표 카드**: 종목별 카드에 실시간에 가까운 가격, 변동률, SMA5/20, RSI14를 표시합니다.
+- **시그널 요약**: 추세·모멘텀 시그널을 알약 형태로 요약하여 매수/매도 판단에 참고할 수 있습니다.
+- **뉴스 피드**: yfinance에서 제공하는 최신 기사 링크를 종목별로 나열합니다.
 
-## Project layout
+## 디렉터리 구조
 
 ```text
 .
-├── AGENTS.md                # Repository guidelines
-├── README.md                # Project documentation and setup notes
+├── AGENTS.md                # 저장소 편집 지침
+├── README.md                # 프로젝트 설명 (본 문서)
 ├── assets/
-│   ├── app.js               # Client-side dashboard logic
-│   └── styles.css           # Visual theme for the dashboard
+│   ├── app.js               # 프런트엔드 로직 및 분류 탭 제어
+│   └── styles.css           # GitHub 다크 테마 기반 스타일 정의
 ├── data/
-│   ├── history/             # CSV time-series snapshots kept by the workflow
-│   └── latest.json          # Most recent snapshot consumed by the dashboard
-├── index.html               # GitHub Pages entry point
-├── requirements.txt         # Python dependencies for scheduled updates
-├── scripts/
-│   └── fetch_market_data.py # Data ingestion script used by automation
-└── .github/workflows/
-    └── update-data.yml      # Hourly GitHub Actions workflow that refreshes data
+│   └── latest.json          # 대시보드가 참조하는 최신 스냅샷
+├── index.html               # GitHub Pages 진입점
+├── requirements.txt         # 데이터 수집 스크립트 의존성
+└── scripts/
+    └── fetch_market_data.py # yfinance 기반 데이터 수집 및 지표 계산 스크립트
 ```
 
-## Local development
+## 데이터 수집과 자동화 흐름
 
-1. Install Python 3.10+ and Node-free tooling (the dashboard is static and uses CDN hosted libraries).
-2. Create and activate a virtual environment if desired.
-3. Install dependencies and run the data fetcher:
+1. `scripts/fetch_market_data.py`가 yfinance를 통해 분 단위 시세와 뉴스 피드를 가져옵니다.
+2. 스크립트가 단기/중기 이동평균(SMA5/20)과 RSI14를 계산하고, 간단한 추세/모멘텀 시그널을 도출합니다.
+3. 최신 스냅샷을 `data/latest.json`에 저장하고, 필요 시 `data/history/`에 CSV를 누적하도록 확장할 수 있습니다.
+4. `.github/workflows/update-data.yml`(기본 제공) 워크플로가 매 시간 실행되어 데이터를 새로고침하고 변경사항을 저장소에 커밋합니다.
+
+> **참고**: GitHub Actions 실행 주기와 yfinance 제공 속도 때문에 완전한 실시간은 불가능합니다. 더 촘촘한 주기가 필요하다면 워크플로의 크론 스케줄을 조정하고, API 호출 제한을 고려하세요.
+
+## 로컬에서 확인하기
+
+1. Python 3.10 이상을 설치합니다.
+2. (선택) 가상환경을 생성한 뒤 의존성을 설치합니다.
 
    ```bash
    pip install -r requirements.txt
+   ```
+
+3. 최신 데이터를 가져옵니다.
+
+   ```bash
    python scripts/fetch_market_data.py
    ```
 
-   The script fetches 1-minute bars for each ticker, calculates a few simple indicators (SMA and RSI), evaluates basic buy/sell signals, stores rolling history in `data/history/`, and writes the freshest snapshot to `data/latest.json` for the dashboard.
+4. 루트 디렉터리에서 간단한 정적 서버(예: `python -m http.server`)를 실행한 뒤 `index.html`을 열면 대시보드가 표시됩니다.
 
-4. Open `index.html` in a browser (or serve the directory with any static server) to view the latest data.
+## 프런트엔드 편집 가이드
 
-## Automated updates on GitHub Pages
+- **탭 구성**: `assets/app.js` 상단의 `CATEGORY_DEFINITIONS` 배열에 분류 이름, 설명, 종목 심볼을 정의합니다. 새 자산을 추가하면 탭에 자동으로 반영됩니다.
+- **카드 구성요소**: `createCard` 함수가 차트, 지표, 시그널, 뉴스 블록을 조립합니다. 지표/시그널 로직을 변경하려면 데이터 스키마와 함께 수정하세요.
+- **스타일 가이드**: `assets/styles.css`는 GitHub 다크 테마를 참고한 색상 팔레트와 탭/카드 스타일을 포함합니다. 반응형 동작은 768px 이하에서 단일 열로 전환됩니다.
+- **접근성**: 탭 버튼은 ARIA `tablist`/`tabpanel` 패턴을 따릅니다. 새로운 컴포넌트를 추가할 때 동일한 접근성 속성을 유지하세요.
 
-GitHub Pages serves the static dashboard from the repository. To keep content updated without manual intervention, the repository defines a scheduled GitHub Actions workflow (`.github/workflows/update-data.yml`) that:
+## 유지보수 팁
 
-1. Runs every hour.
-2. Uses the same Python script to pull fresh market data via `yfinance`.
-3. Commits any changes in `data/latest.json` or the `data/history/` CSVs back to the default branch.
-
-Because the workflow relies on public data sources exposed through `yfinance`, it does not require API keys. Nevertheless, intraday access can occasionally be rate limited or paused by the upstream provider. When that happens the workflow skips committing changes and will try again on the next run.
-
-### Handling credentials for pushes
-
-The workflow leverages the repository-provided `GITHUB_TOKEN`, which is enabled by default. No extra configuration is needed unless branch protection rules require a different automation strategy (for example, sending pull requests instead of direct commits).
-
-## Understanding the indicators and signals
-
-For each instrument the script currently computes:
-
-- **SMA-5 / SMA-20**: Simple moving averages over the last 5 and 20 closing prices.
-- **RSI-14**: Relative Strength Index using 14 periods.
-- **Signal summary**:
-  - *Trend*: Bullish when SMA-5 exceeds SMA-20, bearish when the opposite holds, neutral otherwise.
-  - *Momentum*: Overbought when RSI ≥ 70, oversold when RSI ≤ 30, neutral otherwise.
-
-These rules are intentionally lightweight. You can extend `scripts/fetch_market_data.py` to calculate additional indicators such as MACD, Bollinger Bands, or custom signals as needed.
-
-## News aggregation
-
-`yfinance` exposes a small feed of relevant news for each ticker. The script stores the latest items (capped at five per instrument) in `data/latest.json` so the dashboard can surface headlines alongside the chart.
-
-## Real-time expectations
-
-GitHub Pages hosts a static site, so true tick-by-tick real-time data is not possible. The combination of scheduled workflow updates and client-side polling provides "near real-time" coverage constrained by:
-
-- The frequency of GitHub Actions (the provided workflow runs hourly; you can adjust the cron schedule to every 15 minutes if API rate limits allow).
-- The latency of upstream data sources (`yfinance` data is typically delayed by a few minutes).
-- Browser caching (the dashboard appends a cache-busting timestamp when requesting `latest.json`).
-
-If you require second-by-second updates or guaranteed low-latency data, consider hosting the dashboard on infrastructure that supports background jobs or websockets and using a commercial market data API.
-
-## Next steps
-
-- Tune the indicator calculations or add additional analytics.
-- Add localization or multi-language support for the dashboard text.
-- Expand alerting by integrating webhook notifications triggered by specific signals.
-
-Contributions and refinements are welcome—please keep the documentation and tests up to date as the project grows.
+- 데이터 스키마(`data/latest.json`)가 바뀌면 프런트엔드와 워크플로 양쪽을 모두 업데이트해야 합니다.
+- 자동 커밋을 사용하는 워크플로는 저장소 보호 규칙에 영향을 받을 수 있습니다. 브랜치 보호가 활성화된 경우 PR 방식으로 전환을 검토하세요.
+- 실제 투자 의사결정을 내리기 전에는 공신력 있는 데이터 소스를 재확인하고, 본 대시보드는 교육/연습 용도임을 명시하세요.

@@ -16,19 +16,26 @@
     <script src="assets/app.js" type="module" defer></script>
   </head>
   <body>
-    <header>
-      <h1>한국 증시 모니터링</h1>
-      <p>
-        삼성전자, SK하이닉스, TIGER S&P500, TIGER 나스닥100 종목의 가격, 지표, 매수·매도 시그널,
-        관련 뉴스를 한 곳에서 확인하세요. 데이터는 GitHub Actions를 통해 주기적으로 업데이트됩니다.
-      </p>
-    </header>
-    <main id="dashboard" aria-live="polite"></main>
-    <footer>
-      <p>
-        마지막 업데이트: <span id="last-updated">--</span><br />
-        데이터 제공: <code>yfinance</code> · 본 페이지는 교육 목적의 참고용입니다.
-      </p>
-    </footer>
+    <div class="page-shell">
+      <header>
+        <p class="eyebrow">실시간에 가까운 GitHub Pages 모니터링</p>
+        <h1>한국 증시 &amp; 글로벌 ETF 관제 센터</h1>
+        <p>
+          삼성전자와 SK하이닉스, TIGER S&amp;P500, TIGER 나스닥100의 가격 흐름, 핵심 지표, 매수·매도 시그널, 최신
+          뉴스를 한눈에 확인하세요. 데이터는 GitHub Actions 자동화로 주기적으로 갱신됩니다.
+        </p>
+      </header>
+
+      <nav class="tab-nav" id="category-nav" role="tablist" aria-label="종목 분류"></nav>
+
+      <main id="dashboard" aria-live="polite"></main>
+
+      <footer>
+        <p>
+          마지막 업데이트: <span id="last-updated">--</span><br />
+          데이터 제공: <code>yfinance</code> · 본 페이지는 교육 목적의 참고용입니다.
+        </p>
+      </footer>
+    </div>
   </body>
 </html>

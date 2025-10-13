@@ -23,10 +23,6 @@ let renderedCategories = [...CATEGORY_DEFINITIONS];
 const categoryPanels = new Map();
 
 const priceFormatters = new Map();
-const numberFormatter = new Intl.NumberFormat('ko-KR', {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
-});
 
 const percentFormatter = new Intl.NumberFormat('ko-KR', {
   style: 'percent',
@@ -36,7 +32,9 @@ const percentFormatter = new Intl.NumberFormat('ko-KR', {
 
 const SIGNAL_LABELS = {
   trend: '추세',
-  momentum: '모멘텀',
+  rsi: 'RSI',
+  stochastic: '스토캐스틱',
+  macd: 'MACD',
 };
 
 const SIGNAL_DESCRIPTIONS = {
@@ -45,19 +43,36 @@ const SIGNAL_DESCRIPTIONS = {
     bearish: '하락 추세 (단기 < 중기)',
     neutral: '추세 중립',
   },
-  momentum: {
-    overbought: '과열 구간 (RSI ≥ 70)',
-    oversold: '침체 구간 (RSI ≤ 30)',
-    neutral: '모멘텀 중립',
+  rsi: {
+    buy: '매수 우위 (RSI ≤ 30)',
+    sell: '매도 우위 (RSI ≥ 70)',
+    hold: '중립 (RSI 30~70)',
+  },
+  stochastic: {
+    buy: '과매도 반등 가능성 (%K ≤ 20)',
+    sell: '과매수 조정 가능성 (%K ≥ 80)',
+    hold: '중립 (신호 대기)',
+  },
+  macd: {
+    bullish: '상승 모멘텀 (MACD > Signal)',
+    bearish: '하락 모멘텀 (MACD < Signal)',
+    neutral: '중립 (교차 없음)',
   },
 };
 
 const SIGNAL_STYLES = {
   bullish: 'positive',
+  buy: 'positive',
   oversold: 'positive',
   bearish: 'negative',
+  sell: 'negative',
   overbought: 'negative',
 };
+
+const indicatorNumberFormatter = new Intl.NumberFormat('ko-KR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 async function fetchSnapshot() {
   const cacheBuster = `?t=${Date.now()}`;
@@ -163,7 +178,7 @@ function createCard(ticker) {
       className: change != null ? (change >= 0 ? 'positive' : 'negative') : undefined,
     },
     {
-      label: 'SMA 5',
+      label: '5일 이동평균',
       value:
         ticker.indicators?.sma5 != null
           ? priceFormatter.format(ticker.indicators.sma5)
@@ -176,19 +191,11 @@ function createCard(ticker) {
           : undefined,
     },
     {
-      label: 'RSI 14',
+      label: '20일 이동평균',
       value:
-        ticker.indicators?.rsi14 != null
-          ? numberFormatter.format(ticker.indicators.rsi14)
+        ticker.indicators?.sma20 != null
+          ? priceFormatter.format(ticker.indicators.sma20)
           : '계산 불가',
-      className:
-        ticker.indicators?.rsi14 != null
-          ? ticker.indicators.rsi14 >= 70
-            ? 'negative'
-            : ticker.indicators.rsi14 <= 30
-            ? 'positive'
-            : undefined
-          : undefined,
     },
   ];
 
@@ -206,7 +213,56 @@ function createCard(ticker) {
     meta.appendChild(item);
   });
 
-  const signalsSection = document.createElement('div');
+  const indicatorSection = document.createElement('section');
+  indicatorSection.className = 'indicators';
+  const indicatorTitle = document.createElement('h3');
+  indicatorTitle.textContent = '기술적 지표';
+  indicatorSection.appendChild(indicatorTitle);
+
+  const indicatorGrid = document.createElement('div');
+  indicatorGrid.className = 'indicator-grid';
+
+  const stochastic = ticker.indicators?.stochastic;
+  const macd = ticker.indicators?.macd;
+
+  const indicatorItems = [
+    {
+      label: 'RSI (14)',
+      value:
+        ticker.indicators?.rsi14 != null
+          ? indicatorNumberFormatter.format(ticker.indicators.rsi14)
+          : '계산 불가',
+    },
+    {
+      label: '스토캐스틱 (14, 3, 3)',
+      value:
+        stochastic?.k != null && stochastic?.d != null
+          ? `%K ${indicatorNumberFormatter.format(stochastic.k)} · %D ${indicatorNumberFormatter.format(stochastic.d)}`
+          : '계산 불가',
+    },
+    {
+      label: 'MACD (12, 26, 9)',
+      value:
+        macd?.macd != null && macd?.signal != null && macd?.histogram != null
+          ? `MACD ${indicatorNumberFormatter.format(macd.macd)} · Signal ${indicatorNumberFormatter.format(macd.signal)} · Hist ${indicatorNumberFormatter.format(macd.histogram)}`
+          : '계산 불가',
+    },
+  ];
+
+  indicatorItems.forEach(({ label, value }) => {
+    const item = document.createElement('div');
+    item.className = 'indicator-item';
+    const heading = document.createElement('h4');
+    heading.textContent = label;
+    const content = document.createElement('p');
+    content.textContent = value;
+    item.append(heading, content);
+    indicatorGrid.appendChild(item);
+  });
+
+  indicatorSection.appendChild(indicatorGrid);
+
+  const signalsSection = document.createElement('section');
   signalsSection.className = 'signals';
   const signalsTitle = document.createElement('h3');
   signalsTitle.textContent = '시그널 요약';
@@ -271,7 +327,7 @@ function createCard(ticker) {
 
   newsSection.appendChild(newsList);
 
-  card.append(header, chartContainer, meta, signalsSection, newsSection);
+  card.append(header, chartContainer, meta, indicatorSection, signalsSection, newsSection);
 
   requestAnimationFrame(() => {
     renderChart(canvas, ticker);
@@ -294,8 +350,8 @@ function renderChart(canvas, ticker) {
           label: '종가',
           data,
           fill: false,
-          borderColor: '#2f81f7',
-          backgroundColor: 'rgba(47, 129, 247, 0.18)',
+          borderColor: '#8ba4ff',
+          backgroundColor: 'rgba(139, 164, 255, 0.18)',
           tension: 0.35,
           borderWidth: 2,
           pointRadius: 0,
@@ -309,25 +365,29 @@ function renderChart(canvas, ticker) {
         x: {
           type: 'time',
           ticks: {
-            color: 'rgba(240, 246, 252, 0.65)',
+            color: 'rgba(235, 239, 245, 0.7)',
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 6,
           },
           time: {
-            tooltipFormat: 'yyyy-MM-dd HH:mm',
+            tooltipFormat: 'yyyy-MM-dd',
+            unit: 'day',
           },
           grid: {
-            color: 'rgba(48, 54, 61, 0.5)',
+            color: 'rgba(255, 255, 255, 0.08)',
           },
         },
         y: {
           ticks: {
-            color: 'rgba(240, 246, 252, 0.65)',
+            color: 'rgba(235, 239, 245, 0.7)',
             callback(value) {
               const formatter = ensurePriceFormatter(ticker.currency || 'KRW');
               return formatter.format(value);
             },
           },
           grid: {
-            color: 'rgba(48, 54, 61, 0.35)',
+            color: 'rgba(255, 255, 255, 0.05)',
           },
         },
       },

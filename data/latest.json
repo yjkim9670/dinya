@@ -1,5 +1,5 @@
 {
-  "generated_at": "2024-06-01T00:00:00Z",
+  "generated_at": "2025-10-13T11:08:22.637584+00:00",
   "tickers": [
     {
       "symbol": "005930.KS",
@@ -7,68 +7,106 @@
       "market": "KRX",
       "currency": "KRW",
       "history": [
-        { "timestamp": "2024-05-20T00:00:00Z", "open": 76000, "high": 76800, "low": 75800, "close": 76600, "volume": 1320000 },
-        { "timestamp": "2024-05-21T00:00:00Z", "open": 76600, "high": 77200, "low": 76400, "close": 77000, "volume": 1184000 },
-        { "timestamp": "2024-05-22T00:00:00Z", "open": 77000, "high": 77500, "low": 76800, "close": 77300, "volume": 1256000 },
-        { "timestamp": "2024-05-23T00:00:00Z", "open": 77300, "high": 77800, "low": 77100, "close": 77600, "volume": 1203000 },
-        { "timestamp": "2024-05-24T00:00:00Z", "open": 77600, "high": 78100, "low": 77400, "close": 77950, "volume": 1278000 },
-        { "timestamp": "2024-05-27T00:00:00Z", "open": 77900, "high": 78300, "low": 77600, "close": 78000, "volume": 1294000 },
-        { "timestamp": "2024-05-28T00:00:00Z", "open": 78000, "high": 78600, "low": 77800, "close": 78400, "volume": 1332000 },
-        { "timestamp": "2024-05-29T00:00:00Z", "open": 78400, "high": 78900, "low": 78200, "close": 78750, "volume": 1217000 },
-        { "timestamp": "2024-05-30T00:00:00Z", "open": 78700, "high": 79200, "low": 78500, "close": 79000, "volume": 1286000 },
-        { "timestamp": "2024-05-31T00:00:00Z", "open": 79000, "high": 79400, "low": 78800, "close": 79250, "volume": 1198000 }
-      ],
-      "indicators": {
-        "sma5": 78660.0,
-        "sma20": 77385.0,
-        "rsi14": 62.4,
-        "stochastic": { "k": 78.5, "d": 72.1, "k_period": 14, "d_period": 3, "smooth": 3 },
-        "macd": { "macd": 580.2, "signal": 482.7, "histogram": 97.5, "fast": 12, "slow": 26, "signal_period": 9 }
-      },
-      "signals": {
-        "trend": "bullish",
-        "rsi": "hold",
-        "stochastic": "sell",
-        "macd": "bullish"
-      },
-      "news": [
         {
-          "title": "삼성전자, 차세대 HBM 라인 증설 계획 발표",
-          "publisher": "연합뉴스",
-          "link": "https://example.com/news/samsung-hbm-plan",
-          "published_at": "2024-05-31T07:00:00Z"
+          "timestamp": "2025-09-22T15:00:00+00:00",
+          "open": 85800.0,
+          "high": 85900.0,
+          "low": 83600.0,
+          "close": 84700.0,
+          "volume": 23610263.0
         },
         {
-          "title": "삼성전자 주가, AI 수요 기대감에 8만선 회복",
-          "publisher": "한국경제",
-          "link": "https://example.com/news/samsung-ai-demand",
-          "published_at": "2024-05-31T05:30:00Z"
+          "timestamp": "2025-09-23T15:00:00+00:00",
+          "open": 84200.0,
+          "high": 85500.0,
+          "low": 83700.0,
+          "close": 85400.0,
+          "volume": 18300997.0
+        },
+        {
+          "timestamp": "2025-09-24T15:00:00+00:00",
+          "open": 84400.0,
+          "high": 86200.0,
+          "low": 84100.0,
+          "close": 86100.0,
+          "volume": 19665151.0
+        },
+        {
+          "timestamp": "2025-09-25T15:00:00+00:00",
+          "open": 85000.0,
+          "high": 85300.0,
+          "low": 82400.0,
+          "close": 83300.0,
+          "volume": 24071193.0
+        },
+        {
+          "timestamp": "2025-09-28T15:00:00+00:00",
+          "open": 83300.0,
+          "high": 85000.0,
+          "low": 83200.0,
+          "close": 84200.0,
+          "volume": 13069094.0
+        },
+        {
+          "timestamp": "2025-09-29T15:00:00+00:00",
+          "open": 84600.0,
+          "high": 84900.0,
+          "low": 83400.0,
+          "close": 83900.0,
+          "volume": 16319061.0
+        },
+        {
+          "timestamp": "2025-09-30T15:00:00+00:00",
+          "open": 84900.0,
+          "high": 86200.0,
+          "low": 84700.0,
+          "close": 86000.0,
+          "volume": 22039361.0
+        },
+        {
+          "timestamp": "2025-10-01T15:00:00+00:00",
+          "open": 89300.0,
+          "high": 90300.0,
+          "low": 88700.0,
+          "close": 89750.0,
+          "volume": 49883028.0
+        },
+        {
+          "timestamp": "2025-10-09T15:00:00+00:00",
+          "open": 94000.0,
+          "high": 94500.0,
+          "low": 92700.0,
+          "close": 94400.0,
+          "volume": 35269748.0
+        },
+        {
+          "timestamp": "2025-10-12T15:00:00+00:00",
+          "open": 91300.0,
+          "high": 93400.0,
+          "low": 90700.0,
+          "close": 93300.0,
+          "volume": 25393224.0
         }
-      ]
-    },
-    {
-      "symbol": "000660.KS",
-      "name": "SK하이닉스",
-      "market": "KRX",
-      "currency": "KRW",
-      "history": [
-        { "timestamp": "2024-05-20T00:00:00Z", "open": 168000, "high": 171000, "low": 167500, "close": 170500, "volume": 956000 },
-        { "timestamp": "2024-05-21T00:00:00Z", "open": 170500, "high": 173000, "low": 170000, "close": 172800, "volume": 1023000 },
-        { "timestamp": "2024-05-22T00:00:00Z", "open": 172800, "high": 176000, "low": 172500, "close": 175600, "volume": 1105000 },
-        { "timestamp": "2024-05-23T00:00:00Z", "open": 175600, "high": 177000, "low": 174500, "close": 176800, "volume": 1002000 },
-        { "timestamp": "2024-05-24T00:00:00Z", "open": 176800, "high": 178400, "low": 175600, "close": 177900, "volume": 978000 },
-        { "timestamp": "2024-05-27T00:00:00Z", "open": 178000, "high": 179500, "low": 176800, "close": 178200, "volume": 942000 },
-        { "timestamp": "2024-05-28T00:00:00Z", "open": 178200, "high": 180600, "low": 177500, "close": 179800, "volume": 989000 },
-        { "timestamp": "2024-05-29T00:00:00Z", "open": 179800, "high": 182000, "low": 179200, "close": 181500, "volume": 1014000 },
-        { "timestamp": "2024-05-30T00:00:00Z", "open": 181500, "high": 183000, "low": 180800, "close": 182200, "volume": 954000 },
-        { "timestamp": "2024-05-31T00:00:00Z", "open": 182200, "high": 184200, "low": 181500, "close": 183600, "volume": 912000 }
       ],
       "indicators": {
-        "sma5": 181060.0,
-        "sma20": 175940.0,
-        "rsi14": 68.9,
-        "stochastic": { "k": 82.4, "d": 79.6, "k_period": 14, "d_period": 3, "smooth": 3 },
-        "macd": { "macd": 1450.7, "signal": 1320.4, "histogram": 130.3, "fast": 12, "slow": 26, "signal_period": 9 }
+        "sma5": 89470.0,
+        "sma20": 81597.5,
+        "rsi14": 79.20211429338376,
+        "stochastic": {
+          "k": 96.43488116312234,
+          "d": 95.92715631710672,
+          "k_period": 14,
+          "d_period": 3,
+          "smooth": 3
+        },
+        "macd": {
+          "macd": 5158.062832812444,
+          "signal": 4134.118391363406,
+          "histogram": 1023.9444414490381,
+          "fast": 12,
+          "slow": 26,
+          "signal_period": 9
+        }
       },
       "signals": {
         "trend": "bullish",
@@ -78,10 +116,180 @@
       },
       "news": [
         {
-          "title": "SK하이닉스, HBM4 개발 로드맵 공개",
-          "publisher": "머니투데이",
-          "link": "https://example.com/news/skhynix-hbm4",
-          "published_at": "2024-05-31T06:40:00Z"
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "symbol": "000660.KS",
+      "name": "SK하이닉스",
+      "market": "KRX",
+      "currency": "KRW",
+      "history": [
+        {
+          "timestamp": "2025-09-22T15:00:00+00:00",
+          "open": 355500.0,
+          "high": 363000.0,
+          "low": 353000.0,
+          "close": 361000.0,
+          "volume": 3315336.0
+        },
+        {
+          "timestamp": "2025-09-23T15:00:00+00:00",
+          "open": 359000.0,
+          "high": 364000.0,
+          "low": 348500.0,
+          "close": 357500.0,
+          "volume": 4165199.0
+        },
+        {
+          "timestamp": "2025-09-24T15:00:00+00:00",
+          "open": 352000.0,
+          "high": 359000.0,
+          "low": 349500.0,
+          "close": 356500.0,
+          "volume": 2148215.0
+        },
+        {
+          "timestamp": "2025-09-25T15:00:00+00:00",
+          "open": 347500.0,
+          "high": 349000.0,
+          "low": 333000.0,
+          "close": 336500.0,
+          "volume": 3685324.0
+        },
+        {
+          "timestamp": "2025-09-28T15:00:00+00:00",
+          "open": 339500.0,
+          "high": 351000.0,
+          "low": 339000.0,
+          "close": 349000.0,
+          "volume": 2275986.0
+        },
+        {
+          "timestamp": "2025-09-29T15:00:00+00:00",
+          "open": 353000.0,
+          "high": 356500.0,
+          "low": 347500.0,
+          "close": 347500.0,
+          "volume": 2238614.0
+        },
+        {
+          "timestamp": "2025-09-30T15:00:00+00:00",
+          "open": 351000.0,
+          "high": 362000.0,
+          "low": 351000.0,
+          "close": 360000.0,
+          "volume": 2802437.0
+        },
+        {
+          "timestamp": "2025-10-01T15:00:00+00:00",
+          "open": 388500.0,
+          "high": 404500.0,
+          "low": 384000.0,
+          "close": 395500.0,
+          "volume": 7430763.0
+        },
+        {
+          "timestamp": "2025-10-09T15:00:00+00:00",
+          "open": 426000.0,
+          "high": 439250.0,
+          "low": 416500.0,
+          "close": 428000.0,
+          "volume": 6835852.0
+        },
+        {
+          "timestamp": "2025-10-12T15:00:00+00:00",
+          "open": 405500.0,
+          "high": 415500.0,
+          "low": 403000.0,
+          "close": 415000.0,
+          "volume": 4542807.0
+        }
+      ],
+      "indicators": {
+        "sma5": 389200.0,
+        "sma20": 346500.0,
+        "rsi14": 73.77588680217885,
+        "stochastic": {
+          "k": 85.70701887100331,
+          "d": 87.70077195618349,
+          "k_period": 14,
+          "d_period": 3,
+          "smooth": 3
+        },
+        "macd": {
+          "macd": 30273.712363322673,
+          "signal": 23860.11688101895,
+          "histogram": 6413.595482303725,
+          "fast": 12,
+          "slow": 26,
+          "signal_period": 9
+        }
+      },
+      "signals": {
+        "trend": "bullish",
+        "rsi": "sell",
+        "stochastic": "sell",
+        "macd": "bullish"
+      },
+      "news": [
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
+        },
+        {
+          "title": null,
+          "publisher": null,
+          "link": null,
+          "published_at": null
         }
       ]
     },
@@ -91,38 +299,114 @@
       "market": "KRX",
       "currency": "KRW",
       "history": [
-        { "timestamp": "2024-05-20T00:00:00Z", "open": 15040, "high": 15120, "low": 15020, "close": 15080, "volume": 452000 },
-        { "timestamp": "2024-05-21T00:00:00Z", "open": 15080, "high": 15160, "low": 15060, "close": 15140, "volume": 438000 },
-        { "timestamp": "2024-05-22T00:00:00Z", "open": 15140, "high": 15240, "low": 15100, "close": 15210, "volume": 461000 },
-        { "timestamp": "2024-05-23T00:00:00Z", "open": 15210, "high": 15300, "low": 15180, "close": 15280, "volume": 420000 },
-        { "timestamp": "2024-05-24T00:00:00Z", "open": 15280, "high": 15340, "low": 15240, "close": 15320, "volume": 415000 },
-        { "timestamp": "2024-05-27T00:00:00Z", "open": 15320, "high": 15380, "low": 15290, "close": 15350, "volume": 398000 },
-        { "timestamp": "2024-05-28T00:00:00Z", "open": 15350, "high": 15420, "low": 15310, "close": 15390, "volume": 412000 },
-        { "timestamp": "2024-05-29T00:00:00Z", "open": 15390, "high": 15480, "low": 15370, "close": 15440, "volume": 406000 },
-        { "timestamp": "2024-05-30T00:00:00Z", "open": 15440, "high": 15520, "low": 15410, "close": 15480, "volume": 377000 },
-        { "timestamp": "2024-05-31T00:00:00Z", "open": 15480, "high": 15560, "low": 15460, "close": 15520, "volume": 389000 }
+        {
+          "timestamp": "2025-09-22T15:00:00+00:00",
+          "open": 23125.0,
+          "high": 23210.0,
+          "low": 23125.0,
+          "close": 23175.0,
+          "volume": 6035337.0
+        },
+        {
+          "timestamp": "2025-09-23T15:00:00+00:00",
+          "open": 23080.0,
+          "high": 23160.0,
+          "low": 23050.0,
+          "close": 23160.0,
+          "volume": 2463300.0
+        },
+        {
+          "timestamp": "2025-09-24T15:00:00+00:00",
+          "open": 23165.0,
+          "high": 23175.0,
+          "low": 23110.0,
+          "close": 23115.0,
+          "volume": 3797027.0
+        },
+        {
+          "timestamp": "2025-09-25T15:00:00+00:00",
+          "open": 23115.0,
+          "high": 23240.0,
+          "low": 23115.0,
+          "close": 23215.0,
+          "volume": 4375844.0
+        },
+        {
+          "timestamp": "2025-09-28T15:00:00+00:00",
+          "open": 23275.0,
+          "high": 23280.0,
+          "low": 23170.0,
+          "close": 23175.0,
+          "volume": 4573265.0
+        },
+        {
+          "timestamp": "2025-09-29T15:00:00+00:00",
+          "open": 23175.0,
+          "high": 23260.0,
+          "low": 23152.0,
+          "close": 23235.0,
+          "volume": 4388100.0
+        },
+        {
+          "timestamp": "2025-09-30T15:00:00+00:00",
+          "open": 23275.0,
+          "high": 23355.0,
+          "low": 23200.0,
+          "close": 23200.0,
+          "volume": 4001595.0
+        },
+        {
+          "timestamp": "2025-10-01T15:00:00+00:00",
+          "open": 23390.0,
+          "high": 23450.0,
+          "low": 23375.0,
+          "close": 23380.0,
+          "volume": 5997183.0
+        },
+        {
+          "timestamp": "2025-10-09T15:00:00+00:00",
+          "open": 23740.0,
+          "high": 23870.0,
+          "low": 23740.0,
+          "close": 23830.0,
+          "volume": 6998150.0
+        },
+        {
+          "timestamp": "2025-10-12T15:00:00+00:00",
+          "open": 23525.0,
+          "high": 23640.0,
+          "low": 23465.0,
+          "close": 23530.0,
+          "volume": 9567017.0
+        }
       ],
       "indicators": {
-        "sma5": 15456.0,
-        "sma20": 15264.0,
-        "rsi14": 59.2,
-        "stochastic": { "k": 74.8, "d": 70.3, "k_period": 14, "d_period": 3, "smooth": 3 },
-        "macd": { "macd": 52.6, "signal": 44.1, "histogram": 8.5, "fast": 12, "slow": 26, "signal_period": 9 }
+        "sma5": 23435.0,
+        "sma20": 23010.25,
+        "rsi14": 69.00635838456557,
+        "stochastic": {
+          "k": 86.9394177812746,
+          "d": 87.96893189049695,
+          "k_period": 14,
+          "d_period": 3,
+          "smooth": 3
+        },
+        "macd": {
+          "macd": 312.42577271829214,
+          "signal": 272.8119288646753,
+          "histogram": 39.61384385361686,
+          "fast": 12,
+          "slow": 26,
+          "signal_period": 9
+        }
       },
       "signals": {
         "trend": "bullish",
         "rsi": "hold",
-        "stochastic": "hold",
+        "stochastic": "sell",
         "macd": "bullish"
       },
-      "news": [
-        {
-          "title": "S&P500, 기술주 강세에 또 사상 최고",
-          "publisher": "Bloomberg",
-          "link": "https://example.com/news/sp500-record",
-          "published_at": "2024-05-31T03:10:00Z"
-        }
-      ]
+      "news": []
     },
     {
       "symbol": "133690.KS",
@@ -130,38 +414,114 @@
       "market": "KRX",
       "currency": "KRW",
       "history": [
-        { "timestamp": "2024-05-20T00:00:00Z", "open": 16000, "high": 16120, "low": 15960, "close": 16080, "volume": 385000 },
-        { "timestamp": "2024-05-21T00:00:00Z", "open": 16080, "high": 16200, "low": 16040, "close": 16190, "volume": 392000 },
-        { "timestamp": "2024-05-22T00:00:00Z", "open": 16190, "high": 16340, "low": 16160, "close": 16280, "volume": 401000 },
-        { "timestamp": "2024-05-23T00:00:00Z", "open": 16280, "high": 16410, "low": 16240, "close": 16370, "volume": 396000 },
-        { "timestamp": "2024-05-24T00:00:00Z", "open": 16370, "high": 16490, "low": 16340, "close": 16450, "volume": 388000 },
-        { "timestamp": "2024-05-27T00:00:00Z", "open": 16450, "high": 16530, "low": 16410, "close": 16480, "volume": 374000 },
-        { "timestamp": "2024-05-28T00:00:00Z", "open": 16480, "high": 16620, "low": 16440, "close": 16590, "volume": 389000 },
-        { "timestamp": "2024-05-29T00:00:00Z", "open": 16590, "high": 16680, "low": 16540, "close": 16630, "volume": 371000 },
-        { "timestamp": "2024-05-30T00:00:00Z", "open": 16630, "high": 16740, "low": 16580, "close": 16710, "volume": 364000 },
-        { "timestamp": "2024-05-31T00:00:00Z", "open": 16710, "high": 16820, "low": 16670, "close": 16790, "volume": 356000 }
+        {
+          "timestamp": "2025-09-22T15:00:00+00:00",
+          "open": 152860.0,
+          "high": 153340.0,
+          "low": 152730.0,
+          "close": 153100.0,
+          "volume": 353901.0
+        },
+        {
+          "timestamp": "2025-09-23T15:00:00+00:00",
+          "open": 152170.0,
+          "high": 152765.0,
+          "low": 152010.0,
+          "close": 152765.0,
+          "volume": 452181.0
+        },
+        {
+          "timestamp": "2025-09-24T15:00:00+00:00",
+          "open": 152765.0,
+          "high": 152770.0,
+          "low": 152285.0,
+          "close": 152310.0,
+          "volume": 396852.0
+        },
+        {
+          "timestamp": "2025-09-25T15:00:00+00:00",
+          "open": 152350.0,
+          "high": 153260.0,
+          "low": 152345.0,
+          "close": 153145.0,
+          "volume": 447298.0
+        },
+        {
+          "timestamp": "2025-09-28T15:00:00+00:00",
+          "open": 153455.0,
+          "high": 153455.0,
+          "low": 152720.0,
+          "close": 152805.0,
+          "volume": 473619.0
+        },
+        {
+          "timestamp": "2025-09-29T15:00:00+00:00",
+          "open": 152810.0,
+          "high": 153520.0,
+          "low": 152740.0,
+          "close": 153325.0,
+          "volume": 357606.0
+        },
+        {
+          "timestamp": "2025-09-30T15:00:00+00:00",
+          "open": 153355.0,
+          "high": 153800.0,
+          "low": 152835.0,
+          "close": 152865.0,
+          "volume": 246896.0
+        },
+        {
+          "timestamp": "2025-10-01T15:00:00+00:00",
+          "open": 154350.0,
+          "high": 154890.0,
+          "low": 154350.0,
+          "close": 154475.0,
+          "volume": 562995.0
+        },
+        {
+          "timestamp": "2025-10-09T15:00:00+00:00",
+          "open": 157000.0,
+          "high": 159960.0,
+          "low": 157000.0,
+          "close": 158610.0,
+          "volume": 509606.0
+        },
+        {
+          "timestamp": "2025-10-12T15:00:00+00:00",
+          "open": 155745.0,
+          "high": 156705.0,
+          "low": 155500.0,
+          "close": 155950.0,
+          "volume": 722254.0
+        }
       ],
       "indicators": {
-        "sma5": 16660.0,
-        "sma20": 16345.0,
-        "rsi14": 63.5,
-        "stochastic": { "k": 76.1, "d": 71.4, "k_period": 14, "d_period": 3, "smooth": 3 },
-        "macd": { "macd": 68.4, "signal": 60.2, "histogram": 8.2, "fast": 12, "slow": 26, "signal_period": 9 }
+        "sma5": 155045.0,
+        "sma20": 151401.25,
+        "rsi14": 68.6488264489927,
+        "stochastic": {
+          "k": 82.29843578132046,
+          "d": 87.62184563976318,
+          "k_period": 14,
+          "d_period": 3,
+          "smooth": 3
+        },
+        "macd": {
+          "macd": 2624.173603788222,
+          "signal": 2239.8167546411987,
+          "histogram": 384.35684914702324,
+          "fast": 12,
+          "slow": 26,
+          "signal_period": 9
+        }
       },
       "signals": {
         "trend": "bullish",
         "rsi": "hold",
-        "stochastic": "hold",
+        "stochastic": "sell",
         "macd": "bullish"
       },
-      "news": [
-        {
-          "title": "나스닥100, AI 대형주 강세에 52주 신고가",
-          "publisher": "CNBC",
-          "link": "https://example.com/news/nasdaq-ai-rally",
-          "published_at": "2024-05-31T02:40:00Z"
-        }
-      ]
+      "news": []
     }
   ]
 }

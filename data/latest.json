@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-10-17T14:09:27.823103+00:00",
+  "generated_at": "2025-10-17T15:10:00.067810+00:00",
   "tickers": [
     {
       "symbol": "005930.KS",
@@ -260,38 +260,7 @@
         "stochastic": "sell",
         "macd": "bullish"
       },
-      "news": [
-        {
-          "title": null,
-          "publisher": null,
-          "link": null,
-          "published_at": null
-        },
-        {
-          "title": null,
-          "publisher": null,
-          "link": null,
-          "published_at": null
-        },
-        {
-          "title": null,
-          "publisher": null,
-          "link": null,
-          "published_at": null
-        },
-        {
-          "title": null,
-          "publisher": null,
-          "link": null,
-          "published_at": null
-        },
-        {
-          "title": null,
-          "publisher": null,
-          "link": null,
-          "published_at": null
-        }
-      ]
+      "news": []
     },
     {
       "symbol": "360750.KS",

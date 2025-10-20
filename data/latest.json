@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-10-20T20:10:42.641870+00:00",
+  "generated_at": "2025-10-20T21:08:29.319663+00:00",
   "tickers": [
     {
       "symbol": "005930.KS",
@@ -373,11 +373,11 @@
         },
         {
           "timestamp": "2025-10-19T15:00:00+00:00",
-          "open": 0.0,
-          "high": 0.0,
-          "low": 0.0,
+          "open": 23545.0,
+          "high": 23625.0,
+          "low": 23535.0,
           "close": 23600.0,
-          "volume": 0.0
+          "volume": 3405338.0
         }
       ],
       "indicators": {
@@ -385,8 +385,8 @@
         "sma20": 23237.0,
         "rsi14": 64.00430556672534,
         "stochastic": {
-          "k": 63.614260391198535,
-          "d": 61.68315401351801,
+          "k": 53.01569294762715,
+          "d": 58.150298198994214,
           "k_period": 14,
           "d_period": 3,
           "smooth": 3
@@ -403,7 +403,7 @@
       "signals": {
         "trend": "bullish",
         "rsi": "hold",
-        "stochastic": "buy",
+        "stochastic": "sell",
         "macd": "bearish"
       },
       "news": []
@@ -488,11 +488,11 @@
         },
         {
           "timestamp": "2025-10-19T15:00:00+00:00",
-          "open": 0.0,
-          "high": 0.0,
-          "low": 0.0,
+          "open": 156870.0,
+          "high": 157245.0,
+          "low": 156515.0,
           "close": 157110.0,
-          "volume": 0.0
+          "volume": 384478.0
         }
       ],
       "indicators": {
@@ -500,8 +500,8 @@
         "sma20": 153492.0,
         "rsi14": 66.50039966873564,
         "stochastic": {
-          "k": 60.70229128219737,
-          "d": 54.94743123467097,
+          "k": 49.34650422222483,
+          "d": 51.16216888134679,
           "k_period": 14,
           "d_period": 3,
           "smooth": 3
@@ -518,7 +518,7 @@
       "signals": {
         "trend": "bullish",
         "rsi": "hold",
-        "stochastic": "buy",
+        "stochastic": "sell",
         "macd": "bullish"
       },
       "news": []

@@ -1,13 +1,16 @@
 const DATA_URL = 'data/latest.json';
-const REFRESH_INTERVAL = 5 * 60 * 1000;
+const REFRESH_INTERVAL = 20 * 60 * 1000;
 
 const dashboard = document.getElementById('dashboard');
 const categoryNav = document.getElementById('category-nav');
 const lastUpdated = document.getElementById('last-updated');
+const portfolioOverview = document.getElementById('portfolio-overview');
 
 const DEFAULT_CHART_DAYS = 20;
 const MAX_CHART_DAYS = 60;
 const CHART_RANGE_STEP = 1;
+const BUY_THRESHOLD = 80;
+const SELL_THRESHOLD = 20;
 
 const dateLabelFormatter = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
@@ -87,6 +90,18 @@ const SIGNAL_STYLES = {
   overbought: 'negative',
 };
 
+const ACTION_LABELS = {
+  buy: '매수',
+  sell: '매도',
+  hold: '관망',
+};
+
+const ACTION_BADGE_CLASS = {
+  buy: 'badge-buy',
+  sell: 'badge-sell',
+  hold: 'badge-hold',
+};
+
 const indicatorNumberFormatter = new Intl.NumberFormat('ko-KR', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
@@ -122,6 +137,32 @@ function ensurePriceFormatter(currency) {
   return priceFormatters.get(currency);
 }
 
+function formatLastAction(action, priceFormatter) {
+  if (!action || typeof action !== 'object') {
+    return '최근 자동 매매 내역이 없습니다.';
+  }
+
+  const timestamp = action.timestamp ? formatRelativeTime(action.timestamp) : '시간 정보 없음';
+  const units = action.units ?? 0;
+  const price = action.price != null ? priceFormatter.format(action.price) : '---';
+  const value = action.value != null ? priceFormatter.format(action.value) : '---';
+
+  switch (action.type) {
+    case 'buy':
+      if (units > 0) {
+        return `${timestamp} · ${units}주 매수 @ ${price} (총 ${value})`;
+      }
+      return `${timestamp} · 매수 조건이 충족됐으나 가용 현금이 부족했습니다.`;
+    case 'sell':
+      if (units > 0) {
+        return `${timestamp} · ${units}주 매도 @ ${price} (총 ${value})`;
+      }
+      return `${timestamp} · 매도 조건이 충족됐으나 보유 수량이 없습니다.`;
+    default:
+      return `${timestamp} · 관망 중입니다.`;
+  }
+}
+
 function groupTickers(tickers = []) {
   const grouped = new Map(CATEGORY_DEFINITIONS.map((category) => [category.id, []]));
   const uncategorized = [];
@@ -136,6 +177,143 @@ function groupTickers(tickers = []) {
   });
 
   return { grouped, uncategorized };
+}
+
+function createRecommendationSection(ticker) {
+  const section = document.createElement('section');
+  section.className = 'card-section recommendation';
+
+  const header = document.createElement('div');
+  header.className = 'section-header';
+  const title = document.createElement('h3');
+  title.textContent = '매매 추천';
+  header.appendChild(title);
+  section.appendChild(header);
+
+  const recommendation = ticker.recommendation;
+  if (!recommendation) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-text';
+    empty.textContent = '추천 정보를 불러오지 못했습니다.';
+    section.appendChild(empty);
+    return section;
+  }
+
+  const action = recommendation.action ?? 'hold';
+  const badge = document.createElement('span');
+  badge.className = `action-badge ${ACTION_BADGE_CLASS[action] ?? ACTION_BADGE_CLASS.hold}`;
+  badge.textContent = ACTION_LABELS[action] ?? ACTION_LABELS.hold;
+  header.appendChild(badge);
+
+  const scoreWrapper = document.createElement('div');
+  scoreWrapper.className = 'score-wrapper';
+
+  const scoreValue = document.createElement('div');
+  scoreValue.className = 'score-value';
+  const scoreStrong = document.createElement('strong');
+  scoreStrong.textContent = recommendation.score != null ? recommendation.score.toString() : '--';
+  const scoreUnit = document.createElement('span');
+  scoreUnit.textContent = '점';
+  scoreValue.append(scoreStrong, scoreUnit);
+
+  const scoreBar = document.createElement('div');
+  scoreBar.className = 'score-bar';
+  const scoreFill = document.createElement('div');
+  scoreFill.className = `score-bar-fill ${action}`;
+  scoreFill.style.width = `${recommendation.score ?? 0}%`;
+  scoreBar.appendChild(scoreFill);
+
+  scoreWrapper.append(scoreValue, scoreBar);
+
+  const threshold = document.createElement('p');
+  threshold.className = 'score-threshold';
+  const buyThreshold = recommendation.thresholds?.buy ?? BUY_THRESHOLD;
+  const sellThreshold = recommendation.thresholds?.sell ?? SELL_THRESHOLD;
+  threshold.textContent = `자동 매매 기준: ${buyThreshold}점 이상 매수 · ${sellThreshold}점 이하 매도`;
+
+  const notes = document.createElement('ul');
+  notes.className = 'recommendation-notes';
+  if (Array.isArray(recommendation.notes) && recommendation.notes.length > 0) {
+    recommendation.notes.forEach((note) => {
+      const li = document.createElement('li');
+      li.textContent = note;
+      notes.appendChild(li);
+    });
+  } else {
+    const li = document.createElement('li');
+    li.textContent = '지표 기반 설명이 없습니다.';
+    notes.appendChild(li);
+  }
+
+  section.append(scoreWrapper, threshold, notes);
+  return section;
+}
+
+function createPortfolioSection(ticker, priceFormatter) {
+  const section = document.createElement('section');
+  section.className = 'card-section portfolio';
+
+  const header = document.createElement('div');
+  header.className = 'section-header';
+  const title = document.createElement('h3');
+  title.textContent = '모의투자 현황';
+  header.appendChild(title);
+  section.appendChild(header);
+
+  const portfolio = ticker.portfolio;
+  if (!portfolio) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-text';
+    empty.textContent = '포트폴리오 데이터가 없습니다.';
+    section.appendChild(empty);
+    return section;
+  }
+
+  const portfolioGrid = document.createElement('div');
+  portfolioGrid.className = 'portfolio-grid';
+  const metrics = [
+    {
+      label: '가용 현금',
+      value: priceFormatter.format(portfolio.cash ?? 0),
+    },
+    {
+      label: '보유 수량',
+      value: `${portfolio.shares ?? 0}주`,
+    },
+    {
+      label: '평균 매입가',
+      value:
+        portfolio.average_price != null
+          ? priceFormatter.format(portfolio.average_price)
+          : '---',
+    },
+    {
+      label: '평가 금액',
+      value: priceFormatter.format(portfolio.market_value ?? 0),
+    },
+    {
+      label: '총 자산',
+      value: priceFormatter.format(portfolio.total_value ?? 0),
+    },
+  ];
+
+  metrics.forEach(({ label, value }) => {
+    const item = document.createElement('div');
+    item.className = 'portfolio-item';
+    const heading = document.createElement('h4');
+    heading.textContent = label;
+    const content = document.createElement('p');
+    content.textContent = value;
+    item.append(heading, content);
+    portfolioGrid.appendChild(item);
+  });
+
+  const lastAction = document.createElement('p');
+  lastAction.className = 'portfolio-last-action';
+  lastAction.textContent = formatLastAction(portfolio.last_action, priceFormatter);
+
+  section.append(portfolioGrid, lastAction);
+  return section;
 }
 
 function createCard(ticker) {
@@ -398,7 +576,19 @@ function createCard(ticker) {
 
   newsSection.appendChild(newsList);
 
-  card.append(header, chartContainer, meta, indicatorSection, signalsSection, newsSection);
+  const recommendationSection = createRecommendationSection(ticker);
+  const portfolioSection = createPortfolioSection(ticker, priceFormatter);
+
+  card.append(
+    header,
+    chartContainer,
+    meta,
+    recommendationSection,
+    portfolioSection,
+    indicatorSection,
+    signalsSection,
+    newsSection
+  );
 
   const handleRangeChange = (event) => {
     const value = Number(event.target.value);
@@ -462,8 +652,8 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
           label: '종가',
           data,
           fill: false,
-          borderColor: '#8ba4ff',
-          backgroundColor: 'rgba(139, 164, 255, 0.18)',
+          borderColor: '#3c8dbc',
+          backgroundColor: 'rgba(60, 141, 188, 0.15)',
           tension: 0.35,
           borderWidth: 2,
           pointRadius: 3,
@@ -484,7 +674,7 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
         x: {
           type: 'time',
           ticks: {
-            color: 'rgba(235, 239, 245, 0.7)',
+            color: '#6c757d',
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: 6,
@@ -494,18 +684,18 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
             unit: 'day',
           },
           grid: {
-            color: 'rgba(255, 255, 255, 0.08)',
+            color: '#e4e7ea',
           },
         },
         y: {
           ticks: {
-            color: 'rgba(235, 239, 245, 0.7)',
+            color: '#6c757d',
             callback(value) {
               return priceFormatter.format(value);
             },
           },
           grid: {
-            color: 'rgba(255, 255, 255, 0.05)',
+            color: '#edf0f2',
           },
         },
       },
@@ -662,6 +852,136 @@ function setActiveCategory(categoryId) {
   applyActiveCategory();
 }
 
+function renderPortfolioOverview(summary) {
+  if (!portfolioOverview) {
+    return;
+  }
+
+  portfolioOverview.innerHTML = '';
+
+  const card = document.createElement('section');
+  card.className = 'overview-card card';
+
+  const header = document.createElement('div');
+  header.className = 'overview-header';
+  const title = document.createElement('h2');
+  title.textContent = '모의투자 요약';
+  header.appendChild(title);
+
+  if (summary?.updated_at) {
+    const updated = document.createElement('span');
+    const updatedDate = new Date(summary.updated_at);
+    updated.className = 'overview-updated';
+    updated.textContent = Number.isNaN(updatedDate.getTime())
+      ? '업데이트 시간 정보 없음'
+      : `${updatedDate.toLocaleString('ko-KR')} 기준`;
+    header.appendChild(updated);
+  }
+
+  card.appendChild(header);
+
+  if (!summary) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-text';
+    empty.textContent = '포트폴리오 요약 정보를 불러올 수 없습니다.';
+    card.appendChild(empty);
+    portfolioOverview.appendChild(card);
+    return;
+  }
+
+  const formatter = ensurePriceFormatter('KRW');
+  const totalValue = summary.total_value ?? null;
+  const totalCash = summary.total_cash ?? null;
+  const marketValue = summary.total_market_value ?? null;
+  const initialTotal = summary.initial_total ?? null;
+  const initialPerSymbol = summary.initial_capital_per_symbol ?? null;
+
+  const metrics = document.createElement('div');
+  metrics.className = 'overview-metrics';
+
+  const metricItems = [
+    {
+      label: '총 자산',
+      value: totalValue != null ? formatter.format(totalValue) : '---',
+      emphasize: true,
+    },
+    {
+      label: '가용 현금',
+      value: totalCash != null ? formatter.format(totalCash) : '---',
+    },
+    {
+      label: '보유 평가금액',
+      value: marketValue != null ? formatter.format(marketValue) : '---',
+    },
+    {
+      label: '초기 총자본',
+      value: initialTotal != null ? formatter.format(initialTotal) : '---',
+    },
+  ];
+
+  metricItems.forEach(({ label, value, emphasize }) => {
+    const item = document.createElement('div');
+    item.className = 'overview-metric';
+    if (emphasize) {
+      item.classList.add('emphasize');
+    }
+    const heading = document.createElement('h3');
+    heading.textContent = label;
+    const content = document.createElement('p');
+    content.textContent = value;
+    item.append(heading, content);
+    metrics.appendChild(item);
+  });
+
+  card.appendChild(metrics);
+
+  const profitLoss =
+    totalValue != null && initialTotal != null ? Number(totalValue) - Number(initialTotal) : null;
+  const profitRatio =
+    profitLoss != null && initialTotal ? profitLoss / Number(initialTotal) : null;
+
+  if (profitLoss != null) {
+    const profit = document.createElement('p');
+    profit.className = 'overview-profit';
+
+    if (profitLoss > 0) {
+      profit.classList.add('positive');
+    } else if (profitLoss < 0) {
+      profit.classList.add('negative');
+    } else {
+      profit.classList.add('neutral');
+    }
+
+    const signedValue =
+      profitLoss > 0
+        ? `+${formatter.format(Math.abs(profitLoss))}`
+        : profitLoss < 0
+          ? `-${formatter.format(Math.abs(profitLoss))}`
+          : formatter.format(0);
+    const percentText =
+      profitRatio != null
+        ? `${profitRatio > 0 ? '+' : profitRatio < 0 ? '-' : ''}${percentFormatter.format(
+            Math.abs(profitRatio)
+          )}`
+        : '';
+
+    profit.textContent = percentText
+      ? `누적 손익: ${signedValue} (${percentText})`
+      : `누적 손익: ${signedValue}`;
+
+    card.appendChild(profit);
+  }
+
+  if (initialPerSymbol != null) {
+    const note = document.createElement('p');
+    note.className = 'overview-note';
+    note.textContent = `종목별 초기 자본은 ${formatter.format(initialPerSymbol)}입니다.`;
+    card.appendChild(note);
+  }
+
+  portfolioOverview.appendChild(card);
+}
+
 function renderDashboard(snapshot) {
   const { grouped, uncategorized } = groupTickers(snapshot.tickers);
 
@@ -671,6 +991,8 @@ function renderDashboard(snapshot) {
       chartRangeSelections.delete(symbol);
     }
   });
+
+  renderPortfolioOverview(snapshot.portfolio_summary);
 
   renderedCategories = [...CATEGORY_DEFINITIONS];
   if (uncategorized.length > 0) {
@@ -705,6 +1027,17 @@ function renderError(message) {
   categoryNav.innerHTML = '';
   categoryPanels.clear();
   activeCategory = null;
+
+  if (portfolioOverview) {
+    portfolioOverview.innerHTML = '';
+    const overviewCard = document.createElement('section');
+    overviewCard.className = 'overview-card card';
+    const overviewMessage = document.createElement('p');
+    overviewMessage.className = 'empty-text';
+    overviewMessage.textContent = '포트폴리오 요약을 불러올 수 없습니다.';
+    overviewCard.appendChild(overviewMessage);
+    portfolioOverview.appendChild(overviewCard);
+  }
 
   const errorCard = document.createElement('article');
   errorCard.className = 'card';

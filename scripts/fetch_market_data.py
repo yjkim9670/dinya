@@ -47,7 +47,13 @@ STOCH_SMOOTH = 3
 MACD_FAST = 12
 MACD_SLOW = 26
 MACD_SIGNAL = 9
-PRICE_CHART_DAYS = 10
+PRICE_CHART_DAYS = 60
+
+BUY_THRESHOLD = 80
+SELL_THRESHOLD = 20
+INITIAL_CAPITAL = 10_000_000
+
+PORTFOLIO_FILE = DATA_DIR / 'portfolio.json'
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
@@ -218,6 +224,173 @@ def build_signals(indicators: Dict[str, float | None]) -> Dict[str, str]:
     return signals
 
 
+def compute_recommendation(
+    signals: Dict[str, str], indicators: Dict[str, object]
+) -> Dict[str, object]:
+    score = 50
+    notes: List[str] = []
+
+    sma5 = indicators.get('sma5')
+    sma20 = indicators.get('sma20')
+    if signals.get('trend') == 'bullish':
+        score += 20
+        if sma5 is not None and sma20 is not None:
+            notes.append(
+                f'단기 이동평균({sma5:.2f})이 중기 이동평균({sma20:.2f}) 위에서 움직이고 있습니다.'
+            )
+        else:
+            notes.append('단기 이동평균이 중기 이동평균 위에 있습니다.')
+    elif signals.get('trend') == 'bearish':
+        score -= 20
+        if sma5 is not None and sma20 is not None:
+            notes.append(
+                f'단기 이동평균({sma5:.2f})이 중기 이동평균({sma20:.2f}) 아래로 내려왔습니다.'
+            )
+        else:
+            notes.append('단기 이동평균이 중기 이동평균 아래로 내려왔습니다.')
+
+    rsi14 = indicators.get('rsi14')
+    rsi_signal = signals.get('rsi')
+    if rsi_signal == 'buy':
+        score += 15
+        if rsi14 is not None:
+            notes.append(f'RSI {rsi14:.2f} → 과매도 구간 진입 또는 근접입니다.')
+    elif rsi_signal == 'sell':
+        score -= 15
+        if rsi14 is not None:
+            notes.append(f'RSI {rsi14:.2f} → 과매수 구간 진입 또는 근접입니다.')
+
+    stochastic = indicators.get('stochastic')
+    stochastic_signal = signals.get('stochastic')
+    if stochastic_signal == 'buy':
+        score += 10
+        if isinstance(stochastic, dict) and stochastic.get('k') is not None:
+            notes.append(
+                f'스토캐스틱 %K {stochastic.get("k"):.2f} → 반등 신호에 무게가 실립니다.'
+            )
+    elif stochastic_signal == 'sell':
+        score -= 10
+        if isinstance(stochastic, dict) and stochastic.get('k') is not None:
+            notes.append(
+                f'스토캐스틱 %K {stochastic.get("k"):.2f} → 과매수 구간 경계가 필요합니다.'
+            )
+
+    macd = indicators.get('macd')
+    macd_signal = signals.get('macd')
+    if macd_signal == 'bullish':
+        score += 15
+        if isinstance(macd, dict) and macd.get('macd') is not None and macd.get('signal') is not None:
+            notes.append(
+                f'MACD {macd.get("macd"):.2f}가 시그널 {macd.get("signal"):.2f} 위에 있어 상승 모멘텀이 확인됩니다.'
+            )
+    elif macd_signal == 'bearish':
+        score -= 15
+        if isinstance(macd, dict) and macd.get('macd') is not None and macd.get('signal') is not None:
+            notes.append(
+                f'MACD {macd.get("macd"):.2f}가 시그널 {macd.get("signal"):.2f} 아래에 있어 하락 모멘텀을 경계해야 합니다.'
+            )
+
+    clamped_score = max(0, min(100, round(score)))
+    action: str
+    if clamped_score >= BUY_THRESHOLD:
+        action = 'buy'
+    elif clamped_score <= SELL_THRESHOLD:
+        action = 'sell'
+    else:
+        action = 'hold'
+
+    recommendation = {
+        'score': clamped_score,
+        'action': action,
+        'notes': notes,
+        'thresholds': {'buy': BUY_THRESHOLD, 'sell': SELL_THRESHOLD},
+    }
+
+    return recommendation
+
+
+def load_portfolio_state(symbols: Iterable[str]) -> Dict[str, Dict[str, object]]:
+    try:
+        raw = json.loads(PORTFOLIO_FILE.read_text(encoding='utf-8'))
+    except FileNotFoundError:
+        raw = {}
+    except json.JSONDecodeError:
+        logging.warning('Portfolio file is corrupted. Re-initializing portfolio state.')
+        raw = {}
+
+    if isinstance(raw, dict) and 'symbols' in raw and isinstance(raw['symbols'], dict):
+        state = raw['symbols']
+    elif isinstance(raw, dict):
+        state = raw
+    else:
+        state = {}
+
+    for symbol in symbols:
+        entry = state.get(symbol, {})
+        entry['cash'] = float(entry.get('cash', INITIAL_CAPITAL))
+        entry['shares'] = int(entry.get('shares', 0))
+        entry['avg_price'] = float(entry.get('avg_price', 0.0))
+        entry.setdefault('last_action', None)
+        entry.setdefault('last_price', None)
+        state[symbol] = entry
+
+    return state
+
+
+def save_portfolio_state(state: Dict[str, Dict[str, object]]) -> None:
+    payload = {
+        'updated_at': datetime.now(tz=UTC_TZ).isoformat(),
+        'symbols': state,
+    }
+    PORTFOLIO_FILE.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+
+
+def update_portfolio_entry(
+    entry: Dict[str, object], price: float, action: str
+) -> Dict[str, object]:
+    timestamp = datetime.now(tz=UTC_TZ).isoformat()
+    transaction = {
+        'type': 'hold',
+        'units': 0,
+        'price': price,
+        'value': 0.0,
+        'timestamp': timestamp,
+    }
+
+    if price is None or price <= 0:
+        entry['last_action'] = transaction
+        entry['last_price'] = price
+        return entry
+
+    if action == 'buy':
+        affordable_units = int(entry.get('cash', 0) // price)
+        if affordable_units > 0:
+            cost = affordable_units * price
+            entry['cash'] = float(entry.get('cash', 0) - cost)
+            existing_value = entry.get('shares', 0) * entry.get('avg_price', 0)
+            total_shares = int(entry.get('shares', 0)) + affordable_units
+            if total_shares > 0:
+                entry['avg_price'] = float((existing_value + cost) / total_shares)
+            entry['shares'] = total_shares
+            transaction.update({'type': 'buy', 'units': affordable_units, 'value': cost})
+    elif action == 'sell':
+        held_units = int(entry.get('shares', 0))
+        if held_units > 0:
+            proceeds = held_units * price
+            entry['cash'] = float(entry.get('cash', 0) + proceeds)
+            entry['shares'] = 0
+            entry['avg_price'] = 0.0
+            transaction.update({'type': 'sell', 'units': held_units, 'value': proceeds})
+
+    entry['cash'] = float(round(entry.get('cash', 0.0), 2))
+    entry['avg_price'] = float(round(entry.get('avg_price', 0.0), 2)) if entry.get('shares', 0) else 0.0
+    transaction['value'] = float(round(transaction['value'], 2))
+    entry['last_action'] = transaction
+    entry['last_price'] = price
+
+    return entry
+
+
 def format_timestamp(index: Iterable[pd.Timestamp]) -> List[str]:
     formatted: List[str] = []
     for ts in index:
@@ -363,6 +536,9 @@ def build_snapshot() -> Dict[str, object]:
     tickers_payload = []
     errors = []
 
+    portfolio_state = load_portfolio_state(TICKERS.keys())
+    generated_at = datetime.now(tz=UTC_TZ).isoformat()
+
     for symbol, metadata in TICKERS.items():
         logging.info('Fetching data for %s', symbol)
         ticker = yf.Ticker(symbol)
@@ -370,6 +546,7 @@ def build_snapshot() -> Dict[str, object]:
             history = download_history(ticker, symbol)
             indicators = compute_indicators(history)
             signals = build_signals(indicators)
+            recommendation = compute_recommendation(signals, indicators)
             update_history_csv(symbol, history)
             news = fetch_news(symbol, metadata, ticker)
         except Exception as exc:  # noqa: BLE001 - log and continue
@@ -377,15 +554,42 @@ def build_snapshot() -> Dict[str, object]:
             errors.append(f'{symbol}: {exc}')
             continue
 
+        history_payload = prepare_history_payload(history)
+        latest_close = float(history['Close'].iloc[-1])
+        latest_index = history.index[-1]
+        if latest_index.tzinfo is None:
+            latest_index = latest_index.tz_localize(SEOUL_TZ)
+        latest_timestamp = latest_index.tz_convert(UTC_TZ).isoformat()
+
+        entry = update_portfolio_entry(portfolio_state[symbol], latest_close, recommendation['action'])
+        portfolio_state[symbol] = entry
+        market_value = float(entry.get('shares', 0)) * latest_close
+        portfolio_details = {
+            'cash': float(round(entry.get('cash', 0.0), 2)),
+            'shares': int(entry.get('shares', 0)),
+            'average_price': (float(round(entry.get('avg_price', 0.0), 2)) if entry.get('shares', 0) else None),
+            'market_price': latest_close,
+            'market_value': float(round(market_value, 2)),
+            'total_value': float(round(entry.get('cash', 0.0) + market_value, 2)),
+            'last_action': entry.get('last_action'),
+        }
+        entry['last_price'] = latest_close
+
         tickers_payload.append(
             {
                 'symbol': symbol,
                 'name': metadata['name'],
                 'market': metadata['market'],
                 'currency': 'KRW',
-                'history': prepare_history_payload(history),
+                'latest': {
+                    'close': latest_close,
+                    'timestamp': latest_timestamp,
+                },
+                'history': history_payload,
                 'indicators': indicators,
                 'signals': signals,
+                'recommendation': recommendation,
+                'portfolio': portfolio_details,
                 'news': news,
             }
         )
@@ -393,9 +597,31 @@ def build_snapshot() -> Dict[str, object]:
     if not tickers_payload:
         raise RuntimeError('No ticker data could be fetched')
 
+    total_cash = 0.0
+    total_market_value = 0.0
+    for symbol, entry in portfolio_state.items():
+        cash = float(entry.get('cash', 0.0))
+        shares = float(entry.get('shares', 0))
+        last_price = entry.get('last_price')
+        last_price_value = float(last_price) if last_price else 0.0
+        total_cash += cash
+        total_market_value += shares * last_price_value
+
+    portfolio_summary = {
+        'total_cash': float(round(total_cash, 2)),
+        'total_market_value': float(round(total_market_value, 2)),
+        'total_value': float(round(total_cash + total_market_value, 2)),
+        'initial_capital_per_symbol': INITIAL_CAPITAL,
+        'initial_total': INITIAL_CAPITAL * len(TICKERS),
+        'updated_at': generated_at,
+    }
+
+    save_portfolio_state(portfolio_state)
+
     snapshot = {
-        'generated_at': datetime.now(tz=UTC_TZ).isoformat(),
+        'generated_at': generated_at,
         'tickers': tickers_payload,
+        'portfolio_summary': portfolio_summary,
     }
 
     if errors:

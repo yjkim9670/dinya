@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>한국 증시 모니터링 대시보드</title>
+    <title>한국 주식·ETF 트레이딩 콘솔</title>
     <link rel="stylesheet" href="assets/styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Pretendard:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Source+Sans+Pro:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
@@ -18,14 +18,15 @@
   <body>
     <div class="page-shell">
       <header>
-        <p class="eyebrow">실시간에 가까운 GitHub Pages 모니터링</p>
-        <h1>한국 증시 &amp; 글로벌 ETF 관제 센터</h1>
+        <p class="eyebrow">GitHub Pages · AdminLTE 스타일 대시보드</p>
+        <h1>한국 주식 &amp; ETF 트레이딩 콘솔</h1>
         <p>
-          삼성전자와 SK하이닉스, TIGER S&amp;P500, TIGER 나스닥100의 최근 20영업일에서 최대 3개월까지 선택 가능한 가격 흐름과
-          RSI·스토캐스틱·MACD 지표 기반 시그널을 한눈에 살펴보세요. 뉴스 연동이 필요하면 README의 안내를 참고해 추가 데이터 소스를
-          연결할 수 있습니다. 데이터는 GitHub Actions 자동화로 주기적으로 갱신됩니다.
+          삼성전자·SK하이닉스와 TIGER S&amp;P500·TIGER 나스닥100의 기술적 지표를 기반으로 매매 추천 점수와 자동 모의투자 현황을
+          확인하세요. 차트는 최근 20거래일을 기본으로 최대 3개월까지 확장할 수 있으며, 20분 주기로 최신 데이터가 반영됩니다.
         </p>
       </header>
+
+      <section id="portfolio-overview" class="portfolio-overview" aria-live="polite"></section>
 
       <nav class="tab-nav" id="category-nav" role="tablist" aria-label="종목 분류"></nav>
 

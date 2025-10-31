@@ -10,6 +10,14 @@ GitHub Pages로 배포되는 AdminLTE 스타일의 트레이딩 콘솔입니다.
 - **자동 매매 시뮬레이션**: 종목별 1,000만원의 초기 자본으로 시작해 추천 점수에 따라 잔고와 보유 수량을 자동 갱신합니다. 최근 체결 내역은 카드에 텍스트로 표시됩니다.
 - **조절 가능한 차트 구간**: 슬라이더로 최근 20~60거래일(약 3개월) 범위를 즉시 조절하며, 20분 주기로 데이터가 새로 고쳐집니다.
 - **기술적 지표·뉴스**: RSI·스토캐스틱·MACD 등 핵심 지표와 해석 태그, 관련 뉴스를 카드 내 섹션으로 정리했습니다.
+- **메타데이터 대시보드**: 과제 메타데이터 카드·최근 수정 히스토리·Mermaid 간트차트를 통합 표기하며, network/architecture 유형 문서는 정책상 자동 제외됩니다.
+
+## 메타데이터 플랫폼 확장
+
+- 대시보드 하단에 과제 메타데이터 카드가 추가되었습니다. `data/metadata.json`의 `assignments` 배열을 기준으로 최신 수정 순으로 정렬되며, `network`·`architecture` 유형 문서는 자동으로 필터링됩니다.
+- `history` 배열은 최근 수정 이력을 절대·상대 시간으로 함께 표기하여 변경 흐름을 한눈에 확인할 수 있습니다.
+- `gantt` 필드에는 Mermaid 간트차트 정의를 그대로 입력하면 렌더링되며, 파싱 오류나 스크립트 로딩 실패 시 사용자에게 안내 메시지를 제공합니다.
+- Mermaid 라이브러리는 CDN(`https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js`)을 통해 로드되며, `assets/app.js`가 초기화와 재렌더링을 제어합니다.
 
 ## 표시되는 기술적 지표
 
@@ -32,6 +40,7 @@ GitHub Pages로 배포되는 AdminLTE 스타일의 트레이딩 콘솔입니다.
 ├── data/
 │   ├── history/                   # 종목별 일별 CSV 누적(자동 생성)
 │   ├── latest.json                # 대시보드가 사용하는 최신 스냅샷
+│   ├── metadata.json             # 과제 메타데이터·수정 이력·간트 정의
 │   └── portfolio.json             # 자동 모의투자 잔고 및 최근 조치(자동 생성)
 ├── index.html                     # GitHub Pages 진입점
 ├── requirements.txt               # 데이터 수집 스크립트 의존성
@@ -79,6 +88,7 @@ GitHub Pages로 배포되는 AdminLTE 스타일의 트레이딩 콘솔입니다.
 - **지표/시그널**: `createCard` 함수가 지표 그리드와 시그널 태그, 추천 점수 섹션을 구성합니다. 데이터 스키마를 변경할 경우 `scripts/fetch_market_data.py`와 `data/latest.json`을 함께 수정하세요.
 - **차트 구간**: `DEFAULT_CHART_DAYS`, `MAX_CHART_DAYS` 상수를 조정하면 슬라이더 범위를 변경할 수 있습니다. 사용자 조작 값은 심볼별로 기억되므로 자동 새로고침 후에도 유지됩니다.
 - **포트폴리오 요약**: `renderPortfolioOverview`와 `createPortfolioSection`이 `portfolio_summary` 및 `ticker.portfolio` 데이터를 사용합니다. JSON 구조를 바꾸면 두 함수를 함께 수정하세요.
+- **메타데이터 패널**: `renderMetadataPlatform`이 `data/metadata.json`을 불러와 과제 카드·수정 이력·Mermaid 간트차트를 구성합니다. `network`·`architecture` 유형 문서는 코드에서 자동 제외되므로 다른 유형만 추가하면 됩니다.
 - **스타일 가이드**: `assets/styles.css`는 AdminLTE 톤의 밝은 팔레트와 박스형 레이아웃을 정의합니다. 배지/버튼 색상 대비를 유지하면서 확장하세요.
 - **뉴스 연동**: 스냅샷에 제목·링크가 없는 경우 카드에 안내 문구만 노출됩니다. 뉴스 데이터를 수집하려면 `fetch_market_data.py`에서 RSS(예: 네이버 금융) 또는 뉴스 API를 호출해 `ticker.news` 배열에 `title`, `publisher`, `link`, `published_at`을 채우세요.
 - **접근성**: 탭은 ARIA `tablist`/`tabpanel` 패턴을 사용합니다. 새로운 컴포넌트 추가 시 동일한 접근성 속성을 유지하세요.

@@ -1,0 +1,117 @@
+{
+  "updated_at": "2025-02-07T10:15:00+09:00",
+  "assignments": [
+    {
+      "id": "metadata-pipeline",
+      "name": "데이터 파이프라인 고도화",
+      "owner": "김메타",
+      "category": "데이터 플랫폼",
+      "status": "진행 중",
+      "priority": "상",
+      "progress": 68,
+      "metadata_updated_at": "2025-02-06T21:30:00+09:00",
+      "target_release": "2025-02-20T09:00:00+09:00",
+      "description": "수집·가공 메타데이터를 단일 파이프라인으로 통합하고, 검증 규칙을 추가합니다.",
+      "documents": [
+        {
+          "type": "spec",
+          "title": "요구사항 정의서 v1.2",
+          "url": "docs/specs/metadata-pipeline-v1.2.pdf",
+          "summary": "파이프라인 단계, 예외 처리, SLA 목표를 정리한 최신 요구사항 문서"
+        },
+        {
+          "type": "api",
+          "title": "메타데이터 수집 API 명세",
+          "url": "docs/api/metadata-ingest-openapi.yaml",
+          "summary": "수집 API의 인증 흐름과 엔드포인트별 스키마를 정의한 OpenAPI 문서"
+        }
+      ]
+    },
+    {
+      "id": "metadata-ml-ext",
+      "name": "AI 추천모델 메타데이터 확장",
+      "owner": "박데이터",
+      "category": "ML Ops",
+      "status": "검토 중",
+      "priority": "중",
+      "progress": 42,
+      "metadata_updated_at": "2025-02-05T18:10:00+09:00",
+      "target_release": "2025-02-28T13:00:00+09:00",
+      "description": "모델별 학습/추론 환경 메타데이터를 확장하고 자동 동기화를 준비합니다.",
+      "documents": [
+        {
+          "type": "schema",
+          "title": "추천모델 메타데이터 스키마 제안서",
+          "url": "docs/schema/recommender-metadata-draft.xlsx",
+          "summary": "추천모델 서빙 파이프라인에서 필요한 필수 필드를 정의한 스키마 초안"
+        },
+        {
+          "type": "report",
+          "title": "샘플 데이터 검증 결과",
+          "url": "docs/reports/recommender-sample-validation.pdf",
+          "summary": "실험 계정 3종을 대상으로 신규 메타데이터 검증을 수행한 결과 보고"
+        }
+      ]
+    },
+    {
+      "id": "metadata-qa-auto",
+      "name": "지표 검증 자동화",
+      "owner": "이품질",
+      "category": "품질 관리",
+      "status": "완료",
+      "priority": "보통",
+      "progress": 100,
+      "metadata_updated_at": "2025-02-03T09:20:00+09:00",
+      "description": "지표 추출 파이프라인의 메타데이터 검증을 자동화하고 알림을 연동했습니다.",
+      "documents": [
+        {
+          "type": "qa",
+          "title": "QA 체크리스트",
+          "url": "docs/qa/metadata-quality-checklist.xlsx",
+          "summary": "자동화 대상 검증 항목과 허용 임계값을 정리한 체크리스트"
+        },
+        {
+          "type": "retrospective",
+          "title": "파일럿 회고 노트",
+          "url": "docs/notes/qa-automation-retro.md",
+          "summary": "파일럿 적용 결과와 향후 개선 과제를 정리한 회고 문서"
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "assignment_id": "metadata-pipeline",
+      "assignment_name": "데이터 파이프라인 고도화",
+      "action": "문서 수정",
+      "details": "요구사항 정의서 v1.2 반영",
+      "timestamp": "2025-02-06T21:30:00+09:00",
+      "actor": "김메타"
+    },
+    {
+      "assignment_id": "metadata-ml-ext",
+      "assignment_name": "AI 추천모델 메타데이터 확장",
+      "action": "검증 결과 등록",
+      "details": "샘플 데이터 검증 보고서 업로드",
+      "timestamp": "2025-02-05T18:10:00+09:00",
+      "actor": "박데이터"
+    },
+    {
+      "assignment_id": "metadata-qa-auto",
+      "assignment_name": "지표 검증 자동화",
+      "action": "상태 변경",
+      "details": "파일럿 완료 후 상태를 완료로 전환",
+      "timestamp": "2025-02-03T09:20:00+09:00",
+      "actor": "이품질"
+    },
+    {
+      "assignment_id": "metadata-pipeline",
+      "assignment_name": "데이터 파이프라인 고도화",
+      "action": "검토 메모",
+      "details": "신규 검증 규칙 2건 추가 요청",
+      "timestamp": "2025-02-01T15:45:00+09:00",
+      "actor": "정검토"
+    }
+  ],
+  "gantt": "gantt\n  title 메타데이터 플랫폼 주요 일정\n  dateFormat  YYYY-MM-DD\n  axisFormat  %m/%d\n  section 설계\n  요구사항 정리        :done,    des1, 2025-01-02,2025-01-10\n  메타데이터 스키마 정의:active,  des2, 2025-01-08,2025-02-05\n  section 구현\n  백엔드 API 개발       :crit,    dev1, 2025-02-01,2025-02-20\n  프런트엔드 통합       :        dev2, after dev1, 10d\n  section 검증\n  통합 테스트           :        test1, 2025-02-25,2025-03-05\n"
+}

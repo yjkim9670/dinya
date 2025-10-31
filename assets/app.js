@@ -1,10 +1,16 @@
 const DATA_URL = 'data/latest.json';
+const METADATA_URL = 'data/metadata.json';
 const REFRESH_INTERVAL = 20 * 60 * 1000;
 
 const dashboard = document.getElementById('dashboard');
 const categoryNav = document.getElementById('category-nav');
 const lastUpdated = document.getElementById('last-updated');
 const portfolioOverview = document.getElementById('portfolio-overview');
+const metadataSection = document.getElementById('metadata-platform');
+const metadataSummaryCard = document.getElementById('metadata-summary');
+const metadataAssignmentsContainer = document.getElementById('metadata-assignments');
+const metadataHistoryCard = document.getElementById('metadata-history');
+const metadataGanttCard = document.getElementById('metadata-gantt');
 
 const DEFAULT_CHART_DAYS = 20;
 const MAX_CHART_DAYS = 60;
@@ -42,8 +48,20 @@ const chartEventDisposers = new Map();
 const chartRangeSelections = new Map();
 
 let autoRefreshTimerId = null;
+let mermaidInitialized = false;
 
 const priceFormatters = new Map();
+const EXCLUDED_DOCUMENT_TYPES = new Set(['network', 'architecture']);
+const DOCUMENT_TYPE_LABELS = {
+  spec: '요구사항',
+  api: 'API 명세',
+  schema: '스키마',
+  qa: 'QA 체크리스트',
+  report: '보고서',
+  deck: '발표 자료',
+  retrospective: '회고 노트',
+  guideline: '가이드라인',
+};
 
 const percentFormatter = new Intl.NumberFormat('ko-KR', {
   style: 'percent',
@@ -113,6 +131,17 @@ async function fetchSnapshot() {
 
   if (!response.ok) {
     throw new Error(`데이터를 불러오지 못했습니다 (${response.status})`);
+  }
+
+  return response.json();
+}
+
+async function fetchMetadata() {
+  const cacheBuster = `?t=${Date.now()}`;
+  const response = await fetch(`${METADATA_URL}${cacheBuster}`);
+
+  if (!response.ok) {
+    throw new Error(`메타데이터를 불러오지 못했습니다 (${response.status})`);
   }
 
   return response.json();
@@ -765,6 +794,527 @@ function formatRelativeTime(isoString) {
   return `${days}일 전`;
 }
 
+function formatDateTime(isoString) {
+  if (!isoString) {
+    return null;
+  }
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function clampProgress(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return null;
+  }
+  return Math.min(100, Math.max(0, Math.round(numeric)));
+}
+
+function filterDocuments(documents) {
+  if (!Array.isArray(documents)) {
+    return [];
+  }
+  return documents.filter((doc) => {
+    if (!doc || typeof doc !== 'object') {
+      return false;
+    }
+    const typeKey = typeof doc.type === 'string' ? doc.type.toLowerCase() : '';
+    if (!typeKey) {
+      return true;
+    }
+    return !EXCLUDED_DOCUMENT_TYPES.has(typeKey);
+  });
+}
+
+function getStatusCategory(status) {
+  if (!status || typeof status !== 'string') {
+    return 'default';
+  }
+  if (status.includes('완료')) {
+    return 'done';
+  }
+  if (status.includes('지연')) {
+    return 'delayed';
+  }
+  if (status.includes('대기') || status.includes('검토')) {
+    return 'pending';
+  }
+  return 'active';
+}
+
+function createAssignmentCard(assignment) {
+  const card = document.createElement('article');
+  card.className = 'metadata-card card';
+
+  const header = document.createElement('div');
+  header.className = 'card-header metadata-card-header';
+
+  const title = document.createElement('h2');
+  title.textContent = assignment?.name ?? '제목 미정';
+  header.appendChild(title);
+
+  const owner = assignment?.owner ?? '담당자 미정';
+  const category = assignment?.category ? ` · ${assignment.category}` : '';
+  const subtitle = document.createElement('span');
+  subtitle.textContent = `${owner}${category}`;
+  header.appendChild(subtitle);
+
+  if (assignment?.status) {
+    const statusBadge = document.createElement('span');
+    statusBadge.className = `status-badge status-${getStatusCategory(assignment.status)}`;
+    statusBadge.textContent = assignment.status;
+    header.appendChild(statusBadge);
+  }
+
+  card.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'card-section metadata-assignment-body';
+
+  if (assignment?.description) {
+    const description = document.createElement('p');
+    description.className = 'metadata-assignment-description';
+    description.textContent = assignment.description;
+    body.appendChild(description);
+  }
+
+  const metaGrid = document.createElement('div');
+  metaGrid.className = 'metadata-assignment-meta';
+
+  const metadataUpdatedAt = formatDateTime(assignment?.metadata_updated_at);
+  const metaItems = [
+    {
+      label: '담당',
+      value: owner,
+    },
+    {
+      label: '우선순위',
+      value: assignment?.priority ?? '보통',
+    },
+    {
+      label: '최신 수정',
+      value: metadataUpdatedAt ?? '시간 정보 없음',
+    },
+  ];
+
+  if (assignment?.target_release) {
+    metaItems.push({
+      label: '목표 배포',
+      value: formatDateTime(assignment.target_release) ?? assignment.target_release,
+    });
+  }
+
+  metaItems.forEach(({ label, value }) => {
+    const item = document.createElement('div');
+    item.className = 'metadata-assignment-meta-item';
+    const heading = document.createElement('h3');
+    heading.textContent = label;
+    const content = document.createElement('p');
+    content.textContent = value;
+    item.append(heading, content);
+    metaGrid.appendChild(item);
+  });
+
+  body.appendChild(metaGrid);
+
+  const progressValue = clampProgress(assignment?.progress);
+  if (progressValue != null) {
+    const progressWrapper = document.createElement('div');
+    progressWrapper.className = 'metadata-progress';
+    const progressLabel = document.createElement('div');
+    progressLabel.className = 'metadata-progress-label';
+    progressLabel.textContent = `진척도 ${progressValue}%`;
+    const progressBar = document.createElement('div');
+    progressBar.className = 'metadata-progress-bar';
+    const progressFill = document.createElement('div');
+    progressFill.className = 'metadata-progress-fill';
+    progressFill.style.width = `${progressValue}%`;
+    progressBar.appendChild(progressFill);
+    progressWrapper.append(progressLabel, progressBar);
+    body.appendChild(progressWrapper);
+  }
+
+  const originalDocsCount = Array.isArray(assignment?.documents) ? assignment.documents.length : 0;
+  const docs = filterDocuments(assignment?.documents);
+  const docsSection = document.createElement('section');
+  docsSection.className = 'metadata-documents';
+  const docsTitle = document.createElement('h3');
+  docsTitle.textContent = '연결 문서';
+  docsSection.appendChild(docsTitle);
+
+  if (docs.length > 0) {
+    const list = document.createElement('ul');
+    list.className = 'metadata-documents-list';
+    docs.forEach((doc) => {
+      const item = document.createElement('li');
+      const typeKey = typeof doc.type === 'string' ? doc.type.toLowerCase() : '';
+      if (typeKey) {
+        const badge = document.createElement('span');
+        badge.className = 'metadata-document-type';
+        badge.textContent = DOCUMENT_TYPE_LABELS[typeKey] ?? doc.type;
+        item.appendChild(badge);
+      }
+
+      const link = document.createElement('a');
+      link.href = doc.url ?? '#';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = doc.title ?? DOCUMENT_TYPE_LABELS[typeKey] ?? '문서 링크';
+      item.appendChild(link);
+
+      if (doc.summary) {
+        const summary = document.createElement('p');
+        summary.className = 'metadata-document-summary';
+        summary.textContent = doc.summary;
+        item.appendChild(summary);
+      }
+
+      list.appendChild(item);
+    });
+    docsSection.appendChild(list);
+  } else {
+    const emptyDocs = document.createElement('p');
+    emptyDocs.className = 'empty-text';
+    emptyDocs.textContent = '연결된 문서가 없습니다.';
+    docsSection.appendChild(emptyDocs);
+  }
+
+  if (originalDocsCount > docs.length) {
+    const note = document.createElement('p');
+    note.className = 'metadata-documents-note';
+    note.textContent = '네트워크·아키텍처 문서는 정책에 따라 제외되었습니다.';
+    docsSection.appendChild(note);
+  }
+
+  body.appendChild(docsSection);
+
+  card.appendChild(body);
+  return card;
+}
+
+function renderMetadataSummary(metadata) {
+  if (!metadataSummaryCard) {
+    return;
+  }
+
+  metadataSummaryCard.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const title = document.createElement('h2');
+  title.textContent = '메타데이터 플랫폼 현황';
+  header.appendChild(title);
+  const subtitle = document.createElement('span');
+  subtitle.textContent = '과제별 메타데이터 최신 현황과 수정 이력을 확인하세요.';
+  header.appendChild(subtitle);
+  metadataSummaryCard.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'card-section metadata-summary-body';
+
+  const updatedAt = formatDateTime(metadata?.updated_at);
+  const updated = document.createElement('p');
+  updated.className = 'metadata-summary-updated';
+  updated.textContent = updatedAt ? `마지막 동기화: ${updatedAt}` : '마지막 동기화 시간을 확인할 수 없습니다.';
+  body.appendChild(updated);
+
+  const assignments = Array.isArray(metadata?.assignments) ? metadata.assignments : [];
+  const totalAssignments = assignments.length;
+  const activeCount = assignments.filter((assignment) => assignment?.status?.includes('진행')).length;
+  const completedCount = assignments.filter((assignment) => assignment?.status?.includes('완료')).length;
+
+  const metrics = document.createElement('div');
+  metrics.className = 'metadata-summary-metrics';
+  const metricItems = [
+    { label: '전체 과제', value: `${totalAssignments}건` },
+    { label: '진행 중', value: `${activeCount}건` },
+    { label: '완료', value: `${completedCount}건` },
+  ];
+
+  metricItems.forEach(({ label, value }) => {
+    const item = document.createElement('div');
+    item.className = 'metadata-summary-metric';
+    const heading = document.createElement('h3');
+    heading.textContent = label;
+    const content = document.createElement('p');
+    content.textContent = value;
+    item.append(heading, content);
+    metrics.appendChild(item);
+  });
+
+  body.appendChild(metrics);
+  metadataSummaryCard.appendChild(body);
+}
+
+function renderMetadataAssignments(assignments) {
+  if (!metadataAssignmentsContainer) {
+    return;
+  }
+
+  metadataAssignmentsContainer.innerHTML = '';
+
+  if (!Array.isArray(assignments) || assignments.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = '등록된 과제 메타데이터가 없습니다.';
+    metadataAssignmentsContainer.appendChild(empty);
+    return;
+  }
+
+  const sorted = [...assignments].sort((a, b) => {
+    const dateA = new Date(a?.metadata_updated_at ?? 0).getTime();
+    const dateB = new Date(b?.metadata_updated_at ?? 0).getTime();
+    return dateB - dateA;
+  });
+
+  sorted.forEach((assignment) => {
+    metadataAssignmentsContainer.appendChild(createAssignmentCard(assignment));
+  });
+}
+
+function renderMetadataHistory(history, updatedAt) {
+  if (!metadataHistoryCard) {
+    return;
+  }
+
+  metadataHistoryCard.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const title = document.createElement('h2');
+  title.textContent = '최근 메타데이터 수정';
+  header.appendChild(title);
+
+  const formattedUpdated = formatDateTime(updatedAt);
+  const historyCount = Array.isArray(history) ? Math.min(history.length, 6) : 0;
+  const subtitle = document.createElement('span');
+  if (formattedUpdated) {
+    subtitle.textContent = `${formattedUpdated} 기준 · 최신 ${historyCount}건`;
+  } else {
+    subtitle.textContent = `최신 ${historyCount}건`;
+  }
+  header.appendChild(subtitle);
+  metadataHistoryCard.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'card-section metadata-history-body';
+
+  if (!Array.isArray(history) || history.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-text';
+    empty.textContent = '표시할 수정 이력이 없습니다.';
+    body.appendChild(empty);
+    metadataHistoryCard.appendChild(body);
+    return;
+  }
+
+  const sorted = [...history]
+    .filter((entry) => entry && typeof entry === 'object')
+    .sort((a, b) => new Date(b?.timestamp ?? 0).getTime() - new Date(a?.timestamp ?? 0).getTime())
+    .slice(0, 6);
+
+  const list = document.createElement('ol');
+  list.className = 'metadata-history-list';
+
+  sorted.forEach((entry) => {
+    const item = document.createElement('li');
+    item.className = 'history-entry';
+
+    const heading = document.createElement('h3');
+    heading.textContent = entry.assignment_name ?? entry.assignment_id ?? '과제';
+    item.appendChild(heading);
+
+    const action = document.createElement('p');
+    action.className = 'history-action';
+    const actionParts = [entry.action, entry.details].filter(Boolean);
+    action.textContent = actionParts.length > 0 ? actionParts.join(' · ') : '변경 사항';
+    item.appendChild(action);
+
+    const footer = document.createElement('div');
+    footer.className = 'history-time';
+
+    if (entry.actor) {
+      const actor = document.createElement('span');
+      actor.className = 'history-actor';
+      actor.textContent = entry.actor;
+      footer.appendChild(actor);
+    }
+
+    const timestamp = typeof entry.timestamp === 'string' ? entry.timestamp : null;
+    const formatted = formatDateTime(timestamp);
+    const time = document.createElement('time');
+    if (timestamp) {
+      time.setAttribute('datetime', timestamp);
+    }
+    time.textContent = formatted ?? '시간 정보 없음';
+    footer.appendChild(time);
+
+    const relative = document.createElement('span');
+    relative.className = 'history-relative';
+    relative.textContent = formatRelativeTime(timestamp);
+    footer.appendChild(relative);
+
+    item.appendChild(footer);
+    list.appendChild(item);
+  });
+
+  body.appendChild(list);
+  metadataHistoryCard.appendChild(body);
+}
+
+function renderMetadataGantt(definition, updatedAt) {
+  if (!metadataGanttCard) {
+    return;
+  }
+
+  metadataGanttCard.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const title = document.createElement('h2');
+  title.textContent = '메타데이터 간트차트';
+  header.appendChild(title);
+
+  const formattedUpdated = formatDateTime(updatedAt);
+  const subtitle = document.createElement('span');
+  subtitle.textContent = formattedUpdated ? `${formattedUpdated} 기준` : '간트차트 일정';
+  header.appendChild(subtitle);
+  metadataGanttCard.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'card-section metadata-gantt-body';
+
+  if (!definition || !definition.trim()) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-text';
+    empty.textContent = '간트차트 정의가 없습니다.';
+    body.appendChild(empty);
+    metadataGanttCard.appendChild(body);
+    return;
+  }
+
+  const mermaidContainer = document.createElement('div');
+  mermaidContainer.className = 'mermaid metadata-gantt-diagram';
+  mermaidContainer.textContent = definition;
+  body.appendChild(mermaidContainer);
+  metadataGanttCard.appendChild(body);
+
+  const mermaidAPI = window.mermaid;
+  if (mermaidAPI) {
+    try {
+      if (!mermaidInitialized && typeof mermaidAPI.initialize === 'function') {
+        mermaidAPI.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+        mermaidInitialized = true;
+      }
+
+      if (typeof mermaidAPI.run === 'function') {
+        mermaidAPI.run({ nodes: [mermaidContainer] });
+      } else if (typeof mermaidAPI.init === 'function') {
+        mermaidAPI.init(undefined, [mermaidContainer]);
+      }
+    } catch (error) {
+      console.error('Mermaid render error', error);
+      body.innerHTML = '';
+      const fallback = document.createElement('p');
+      fallback.className = 'empty-text';
+      fallback.textContent = '간트차트를 렌더링하지 못했습니다. 머메이드 구문을 확인해주세요.';
+      body.appendChild(fallback);
+    }
+  } else {
+    const note = document.createElement('p');
+    note.className = 'empty-text';
+    note.textContent = 'Mermaid 스크립트를 불러오지 못했습니다.';
+    body.appendChild(note);
+  }
+}
+
+function renderMetadataPlatform(metadata) {
+  if (!metadataSection) {
+    return;
+  }
+
+  if (metadataSection.hasAttribute('hidden')) {
+    metadataSection.removeAttribute('hidden');
+  }
+
+  renderMetadataSummary(metadata);
+  renderMetadataAssignments(metadata?.assignments ?? []);
+  renderMetadataHistory(metadata?.history ?? [], metadata?.updated_at);
+  renderMetadataGantt(metadata?.gantt ?? '', metadata?.updated_at);
+}
+
+function renderMetadataError(message) {
+  if (!metadataSection) {
+    return;
+  }
+
+  renderMetadataSummary({ updated_at: null, assignments: [] });
+
+  if (metadataSummaryCard) {
+    const body = metadataSummaryCard.querySelector('.metadata-summary-body');
+    if (body) {
+      body.innerHTML = '';
+      const errorMessage = document.createElement('p');
+      errorMessage.className = 'empty-text';
+      errorMessage.textContent = message;
+      body.appendChild(errorMessage);
+    }
+  }
+
+  if (metadataAssignmentsContainer) {
+    metadataAssignmentsContainer.innerHTML = '';
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = '과제 메타데이터를 불러오지 못했습니다.';
+    metadataAssignmentsContainer.appendChild(empty);
+  }
+
+  if (metadataHistoryCard) {
+    metadataHistoryCard.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    const title = document.createElement('h2');
+    title.textContent = '최근 메타데이터 수정';
+    header.appendChild(title);
+    metadataHistoryCard.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'card-section metadata-history-body';
+    const empty = document.createElement('p');
+    empty.className = 'empty-text';
+    empty.textContent = '수정 이력을 불러올 수 없습니다.';
+    body.appendChild(empty);
+    metadataHistoryCard.appendChild(body);
+  }
+
+  if (metadataGanttCard) {
+    metadataGanttCard.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    const title = document.createElement('h2');
+    title.textContent = '메타데이터 간트차트';
+    header.appendChild(title);
+    metadataGanttCard.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'card-section metadata-gantt-body';
+    const empty = document.createElement('p');
+    empty.className = 'empty-text';
+    empty.textContent = '간트차트를 불러올 수 없습니다.';
+    body.appendChild(empty);
+    metadataGanttCard.appendChild(body);
+  }
+}
+
 function buildPanels(grouped, categories) {
   categoryPanels.clear();
   dashboard.innerHTML = '';
@@ -1068,13 +1618,31 @@ function scheduleAutoRefresh() {
 
 async function refreshDashboard(showError = false) {
   try {
-    const snapshot = await fetchSnapshot();
-    renderDashboard(snapshot);
+    const [snapshotResult, metadataResult] = await Promise.allSettled([fetchSnapshot(), fetchMetadata()]);
+
+    if (snapshotResult.status === 'fulfilled') {
+      renderDashboard(snapshotResult.value);
+    } else {
+      console.error(snapshotResult.reason);
+      if (showError) {
+        const message = snapshotResult.reason?.message ?? '데이터를 불러오지 못했습니다.';
+        renderError(message);
+      }
+    }
+
+    if (metadataResult.status === 'fulfilled') {
+      renderMetadataPlatform(metadataResult.value);
+    } else {
+      console.error(metadataResult.reason);
+      const message = metadataResult.reason?.message ?? '메타데이터를 불러올 수 없습니다.';
+      renderMetadataError(message);
+    }
   } catch (error) {
     console.error(error);
     if (showError) {
       renderError(error.message);
     }
+    renderMetadataError('메타데이터를 불러오는 중 오류가 발생했습니다.');
   }
 }
 

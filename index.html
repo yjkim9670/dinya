@@ -13,6 +13,7 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
     <script src="assets/app.js" type="module" defer></script>
   </head>
   <body>
@@ -31,6 +32,17 @@
       <nav class="tab-nav" id="category-nav" role="tablist" aria-label="종목 분류"></nav>
 
       <main id="dashboard" aria-live="polite"></main>
+
+      <section id="metadata-platform" class="metadata-platform" aria-live="polite">
+        <article id="metadata-summary" class="metadata-summary card"></article>
+        <div class="metadata-layout">
+          <div id="metadata-assignments" class="metadata-assignments"></div>
+          <aside class="metadata-sidebar">
+            <article id="metadata-history" class="metadata-history card" aria-live="polite"></article>
+            <article id="metadata-gantt" class="metadata-gantt card"></article>
+          </aside>
+        </div>
+      </section>
 
       <footer>
         <p>

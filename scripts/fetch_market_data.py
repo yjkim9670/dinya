@@ -47,7 +47,7 @@ STOCH_SMOOTH = 3
 MACD_FAST = 12
 MACD_SLOW = 26
 MACD_SIGNAL = 9
-PRICE_CHART_DAYS = 60
+PRICE_CHART_DAYS = 180  # 6+ months (approximately 180 trading days)
 
 BUY_THRESHOLD = 80
 SELL_THRESHOLD = 20
@@ -401,7 +401,7 @@ def format_timestamp(index: Iterable[pd.Timestamp]) -> List[str]:
 
 
 def download_history(ticker: yf.Ticker, symbol: str) -> pd.DataFrame:
-    history = ticker.history(period='3mo', interval='1d', auto_adjust=False)
+    history = ticker.history(period='9mo', interval='1d', auto_adjust=False)
 
     if history.empty:
         raise RuntimeError(f'No price data returned for {symbol}')
@@ -428,6 +428,54 @@ def prepare_history_payload(history: pd.DataFrame) -> List[Dict[str, float | str
             }
         )
     return payload
+
+
+def compute_trading_signals(history: pd.DataFrame) -> List[Dict[str, object]]:
+    """Compute buy/sell signals for each day in the history."""
+    signals = []
+
+    # Need at least 30 days for proper indicator calculation
+    min_required = max(RSI_PERIOD, STOCH_K_PERIOD, MACD_SLOW) + 10
+    if len(history) < min_required:
+        return signals
+
+    # Calculate signals for last 180 days
+    analysis_window = min(PRICE_CHART_DAYS, len(history))
+    start_idx = len(history) - analysis_window
+
+    for i in range(start_idx, len(history)):
+        # Use data up to current point
+        window_data = history.iloc[:i+1]
+
+        # Need minimum data for indicators
+        if len(window_data) < min_required:
+            continue
+
+        try:
+            indicators = compute_indicators(window_data)
+            signal_data = build_signals(indicators)
+            recommendation = compute_recommendation(signal_data, indicators)
+
+            action = recommendation.get('action')
+            score = recommendation.get('score')
+
+            # Only record buy/sell signals (not hold)
+            if action in ('buy', 'sell'):
+                timestamp = window_data.index[-1]
+                if timestamp.tzinfo is None:
+                    timestamp = timestamp.tz_localize(SEOUL_TZ)
+
+                signals.append({
+                    'timestamp': timestamp.tz_convert(UTC_TZ).isoformat(),
+                    'action': action,
+                    'score': score,
+                    'price': float(window_data['Close'].iloc[-1])
+                })
+        except Exception:
+            # Skip if indicator calculation fails
+            continue
+
+    return signals
 
 
 def update_history_csv(symbol: str, history: pd.DataFrame) -> None:
@@ -555,6 +603,7 @@ def build_snapshot() -> Dict[str, object]:
             continue
 
         history_payload = prepare_history_payload(history)
+        trading_signals = compute_trading_signals(history)
         latest_close = float(history['Close'].iloc[-1])
         latest_index = history.index[-1]
         if latest_index.tzinfo is None:
@@ -586,6 +635,7 @@ def build_snapshot() -> Dict[str, object]:
                     'timestamp': latest_timestamp,
                 },
                 'history': history_payload,
+                'trading_signals': trading_signals,
                 'indicators': indicators,
                 'signals': signals,
                 'recommendation': recommendation,

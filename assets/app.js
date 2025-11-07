@@ -6,9 +6,9 @@ const categoryNav = document.getElementById('category-nav');
 const lastUpdated = document.getElementById('last-updated');
 const portfolioOverview = document.getElementById('portfolio-overview');
 
-const DEFAULT_CHART_DAYS = 20;
-const MAX_CHART_DAYS = 60;
-const CHART_RANGE_STEP = 1;
+const DEFAULT_CHART_DAYS = 30;
+const MAX_CHART_DAYS = 180;
+const CHART_RANGE_STEP = 5;
 const BUY_THRESHOLD = 80;
 const SELL_THRESHOLD = 20;
 
@@ -623,6 +623,30 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
   const data = limitedHistory.map((entry) => entry.close);
   const priceFormatter = ensurePriceFormatter(ticker.currency || 'KRW');
 
+  // Filter trading signals within the displayed range
+  const tradingSignals = Array.isArray(ticker.trading_signals) ? ticker.trading_signals : [];
+  const startTimestamp = limitedHistory[0]?.timestamp;
+  const endTimestamp = limitedHistory[limitedHistory.length - 1]?.timestamp;
+
+  const visibleSignals = tradingSignals.filter((signal) => {
+    return signal.timestamp >= startTimestamp && signal.timestamp <= endTimestamp;
+  });
+
+  // Separate buy and sell signals for different datasets
+  const buySignals = visibleSignals
+    .filter((signal) => signal.action === 'buy')
+    .map((signal) => ({
+      x: new Date(signal.timestamp),
+      y: signal.price,
+    }));
+
+  const sellSignals = visibleSignals
+    .filter((signal) => signal.action === 'sell')
+    .map((signal) => ({
+      x: new Date(signal.timestamp),
+      y: signal.price,
+    }));
+
   const infoDate = canvas.parentElement?.querySelector('.info-date');
   const infoValue = canvas.parentElement?.querySelector('.info-value');
 
@@ -643,24 +667,59 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
   const latestEntry = limitedHistory[limitedHistory.length - 1] ?? null;
   updateInfo(latestEntry);
 
+  const datasets = [
+    {
+      label: '종가',
+      data,
+      fill: false,
+      borderColor: '#4db8ff',
+      backgroundColor: 'rgba(77, 184, 255, 0.15)',
+      tension: 0.35,
+      borderWidth: 2,
+      pointRadius: 2,
+      pointHoverRadius: 6,
+      pointHitRadius: 12,
+      order: 2,
+    },
+  ];
+
+  // Add buy signals
+  if (buySignals.length > 0) {
+    datasets.push({
+      label: '매수 시그널',
+      data: buySignals,
+      type: 'scatter',
+      backgroundColor: '#26de81',
+      borderColor: '#26de81',
+      pointRadius: 8,
+      pointHoverRadius: 10,
+      pointStyle: 'triangle',
+      rotation: 0,
+      order: 1,
+    });
+  }
+
+  // Add sell signals
+  if (sellSignals.length > 0) {
+    datasets.push({
+      label: '매도 시그널',
+      data: sellSignals,
+      type: 'scatter',
+      backgroundColor: '#fc5c65',
+      borderColor: '#fc5c65',
+      pointRadius: 8,
+      pointHoverRadius: 10,
+      pointStyle: 'triangle',
+      rotation: 180,
+      order: 1,
+    });
+  }
+
   const chart = new Chart(canvas.getContext('2d'), {
     type: 'line',
     data: {
       labels,
-      datasets: [
-        {
-          label: '종가',
-          data,
-          fill: false,
-          borderColor: '#3c8dbc',
-          backgroundColor: 'rgba(60, 141, 188, 0.15)',
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 3,
-          pointHoverRadius: 6,
-          pointHitRadius: 12,
-        },
-      ],
+      datasets,
     },
     options: {
       responsive: true,
@@ -674,45 +733,73 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
         x: {
           type: 'time',
           ticks: {
-            color: '#6c757d',
+            color: '#a0a4ab',
             maxRotation: 0,
             autoSkip: true,
-            maxTicksLimit: 6,
+            maxTicksLimit: 8,
           },
           time: {
             tooltipFormat: 'yyyy-MM-dd',
-            unit: 'day',
+            unit: rangeDays > 90 ? 'month' : 'day',
           },
           grid: {
-            color: '#e4e7ea',
+            color: '#3a3f4b',
           },
         },
         y: {
           ticks: {
-            color: '#6c757d',
+            color: '#a0a4ab',
             callback(value) {
               return priceFormatter.format(value);
             },
           },
           grid: {
-            color: '#edf0f2',
+            color: '#3a3f4b',
           },
         },
       },
       plugins: {
         legend: {
-          display: false,
+          display: true,
+          position: 'top',
+          labels: {
+            color: '#e4e6eb',
+            usePointStyle: true,
+            padding: 15,
+            font: {
+              size: 11,
+            },
+          },
         },
         tooltip: {
-          displayColors: false,
+          displayColors: true,
+          backgroundColor: 'rgba(37, 41, 48, 0.95)',
+          titleColor: '#e4e6eb',
+          bodyColor: '#e4e6eb',
+          borderColor: '#3a3f4b',
+          borderWidth: 1,
           callbacks: {
             title(context) {
-              const entry = limitedHistory[context[0]?.dataIndex];
+              const item = context[0];
+              if (!item) return '';
+
+              // For scatter points (signals)
+              if (item.raw && typeof item.raw === 'object' && item.raw.x) {
+                const date = new Date(item.raw.x);
+                return Number.isNaN(date.getTime()) ? '' : dateLabelFormatter.format(date);
+              }
+
+              // For line points (price)
+              const entry = limitedHistory[item.dataIndex];
               if (!entry) return '';
               const parsedDate = new Date(entry.timestamp);
               return Number.isNaN(parsedDate.getTime()) ? '' : dateLabelFormatter.format(parsedDate);
             },
             label(context) {
+              if (context.dataset.label === '매수 시그널' || context.dataset.label === '매도 시그널') {
+                const price = context.raw.y;
+                return `${context.dataset.label}: ${priceFormatter.format(price)}`;
+              }
               return `종가: ${priceFormatter.format(context.parsed.y)}`;
             },
           },

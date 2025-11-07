@@ -16,9 +16,30 @@
     <script src="assets/app.js" type="module" defer></script>
   </head>
   <body>
+    <nav class="menu-bar">
+      <div class="menu-container">
+        <a href="#" class="menu-logo">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
+          </svg>
+          트레이딩 콘솔
+        </a>
+        <div class="menu-nav" id="menu-nav">
+          <a href="#" class="active">대시보드</a>
+          <a href="#portfolio">포트폴리오</a>
+          <a href="#analytics">분석</a>
+          <a href="#settings">설정</a>
+        </div>
+        <button class="menu-toggle" id="menu-toggle" aria-label="메뉴 토글">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
     <div class="page-shell">
       <header>
-        <p class="eyebrow">GitHub Pages · AdminLTE 스타일 대시보드</p>
+        <p class="eyebrow">GitHub Pages · 차콜 그레이 테마</p>
         <h1>한국 주식 &amp; ETF 트레이딩 콘솔</h1>
         <p>
           삼성전자·SK하이닉스와 TIGER S&amp;P500·TIGER 나스닥100의 기술적 지표를 기반으로 매매 추천 점수와 자동 모의투자 현황을

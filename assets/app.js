@@ -1094,3 +1094,34 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// Menu toggle functionality
+const menuToggle = document.getElementById('menu-toggle');
+const menuNav = document.getElementById('menu-nav');
+
+if (menuToggle && menuNav) {
+  menuToggle.addEventListener('click', () => {
+    menuToggle.classList.toggle('open');
+    menuNav.classList.toggle('open');
+  });
+
+  // Close menu when clicking on a link
+  const menuLinks = menuNav.querySelectorAll('a');
+  menuLinks.forEach((link) => {
+    link.addEventListener('click', () => {
+      menuToggle.classList.remove('open');
+      menuNav.classList.remove('open');
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (event) => {
+    const isClickInsideMenu = menuNav.contains(event.target);
+    const isClickOnToggle = menuToggle.contains(event.target);
+
+    if (!isClickInsideMenu && !isClickOnToggle && menuNav.classList.contains('open')) {
+      menuToggle.classList.remove('open');
+      menuNav.classList.remove('open');
+    }
+  });
+}

@@ -32,6 +32,27 @@ body {
   flex-direction: column;
 }
 
+/* Skip Link for Accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-color);
+  color: #1a1d23;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0 0 10px 0;
+  z-index: 10000;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid rgba(77, 184, 255, 0.4);
+  outline-offset: 2px;
+}
+
 /* Menu Bar Styles */
 .menu-bar {
   background: var(--menu-bg);
@@ -60,6 +81,19 @@ body {
   font-weight: 700;
   color: var(--accent-color);
   text-decoration: none;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  transition: all 0.2s ease;
+}
+
+.menu-logo:hover {
+  background: var(--menu-hover);
+}
+
+.menu-logo:focus-visible {
+  outline: 3px solid rgba(77, 184, 255, 0.4);
+  outline-offset: 2px;
 }
 
 .menu-logo svg {
@@ -95,6 +129,12 @@ body {
   color: var(--text-color);
 }
 
+.menu-nav a:focus-visible,
+.menu-nav button:focus-visible {
+  outline: 3px solid rgba(77, 184, 255, 0.4);
+  outline-offset: 2px;
+}
+
 .menu-nav a.active {
   background: var(--accent-color);
   color: #1a1d23;
@@ -108,6 +148,12 @@ body {
   border: none;
   cursor: pointer;
   padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.menu-toggle:focus-visible {
+  outline: 3px solid rgba(77, 184, 255, 0.4);
+  outline-offset: 2px;
 }
 
 .menu-toggle span {
@@ -462,6 +508,12 @@ main {
 .chart-container input[type='range'] {
   width: 180px;
   accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+.chart-container input[type='range']:focus-visible {
+  outline: 3px solid rgba(77, 184, 255, 0.4);
+  outline-offset: 2px;
 }
 
 .chart-info {
@@ -772,10 +824,20 @@ canvas {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  margin: -0.9rem -1rem;
+  padding: 0.9rem 1rem;
 }
 
 .news li a:hover {
   color: var(--accent-color);
+  background: rgba(77, 184, 255, 0.05);
+}
+
+.news li a:focus-visible {
+  outline: 3px solid rgba(77, 184, 255, 0.4);
+  outline-offset: 2px;
 }
 
 .news li a strong {
@@ -812,8 +874,31 @@ code {
 }
 
 @media (max-width: 768px) {
+  .page-shell {
+    padding: 2rem 1rem 2.5rem;
+  }
+
   header {
     padding: 2.25rem 1.75rem;
+  }
+
+  header h1 {
+    font-size: clamp(1.8rem, 6vw, 2.2rem);
+  }
+
+  header p {
+    font-size: 1rem;
+  }
+
+  .overview-metrics,
+  .meta,
+  .portfolio-grid,
+  .indicator-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-grid {
+    grid-template-columns: 1fr;
   }
 
   .chart-container input[type='range'] {
@@ -825,7 +910,22 @@ code {
     align-items: flex-start;
   }
 
+  .chart-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
   .tab-button {
     width: 100%;
+  }
+
+  .card-header,
+  .chart-container,
+  .meta,
+  .card-section,
+  .indicators,
+  .signals,
+  .news {
+    padding: 1.2rem 1.5rem;
   }
 }

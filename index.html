@@ -16,21 +16,22 @@
     <script src="assets/app.js" type="module" defer></script>
   </head>
   <body>
-    <nav class="menu-bar">
+    <a href="#main-content" class="skip-link">본문으로 바로가기</a>
+    <nav class="menu-bar" role="navigation" aria-label="주 내비게이션">
       <div class="menu-container">
-        <a href="#" class="menu-logo">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <a href="#" class="menu-logo" aria-label="트레이딩 콘솔 홈">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
           </svg>
           트레이딩 콘솔
         </a>
-        <div class="menu-nav" id="menu-nav">
-          <a href="#" class="active">대시보드</a>
-          <a href="#portfolio">포트폴리오</a>
-          <a href="#analytics">분석</a>
-          <a href="#settings">설정</a>
+        <div class="menu-nav" id="menu-nav" role="menubar">
+          <a href="#" class="active" role="menuitem" aria-current="page">대시보드</a>
+          <a href="#portfolio" role="menuitem">포트폴리오</a>
+          <a href="#analytics" role="menuitem">분석</a>
+          <a href="#settings" role="menuitem">설정</a>
         </div>
-        <button class="menu-toggle" id="menu-toggle" aria-label="메뉴 토글">
+        <button class="menu-toggle" id="menu-toggle" aria-label="메뉴 토글" aria-expanded="false" aria-controls="menu-nav">
           <span></span>
           <span></span>
           <span></span>
@@ -51,7 +52,7 @@
 
       <nav class="tab-nav" id="category-nav" role="tablist" aria-label="종목 분류"></nav>
 
-      <main id="dashboard" aria-live="polite"></main>
+      <main id="main-content" aria-live="polite"></main>
 
       <footer>
         <p>

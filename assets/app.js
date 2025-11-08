@@ -1201,8 +1201,9 @@ const menuNav = document.getElementById('menu-nav');
 
 if (menuToggle && menuNav) {
   menuToggle.addEventListener('click', () => {
-    menuToggle.classList.toggle('open');
+    const isOpen = menuToggle.classList.toggle('open');
     menuNav.classList.toggle('open');
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
   });
 
   // Close menu when clicking on a link
@@ -1211,6 +1212,7 @@ if (menuToggle && menuNav) {
     link.addEventListener('click', () => {
       menuToggle.classList.remove('open');
       menuNav.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
     });
   });
 
@@ -1222,6 +1224,7 @@ if (menuToggle && menuNav) {
     if (!isClickInsideMenu && !isClickOnToggle && menuNav.classList.contains('open')) {
       menuToggle.classList.remove('open');
       menuNav.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
     }
   });
 }

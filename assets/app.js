@@ -737,6 +737,9 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: 8,
+            font: {
+              family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            },
           },
           time: {
             tooltipFormat: 'yyyy-MM-dd',
@@ -749,6 +752,9 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
         y: {
           ticks: {
             color: '#a0a4ab',
+            font: {
+              family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            },
             callback(value) {
               return priceFormatter.format(value);
             },
@@ -768,6 +774,7 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
             padding: 15,
             font: {
               size: 11,
+              family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             },
           },
         },
@@ -778,6 +785,12 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
           bodyColor: '#e4e6eb',
           borderColor: '#3a3f4b',
           borderWidth: 1,
+          titleFont: {
+            family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          },
+          bodyFont: {
+            family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          },
           callbacks: {
             title(context) {
               const item = context[0];

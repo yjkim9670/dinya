@@ -16,7 +16,7 @@
     <script src="assets/app.js" type="module" defer></script>
   </head>
   <body>
-    <a href="#main-content" class="skip-link">본문으로 바로가기</a>
+    <a href="#dashboard" class="skip-link">본문으로 바로가기</a>
     <nav class="menu-bar" role="navigation" aria-label="주 내비게이션">
       <div class="menu-container">
         <a href="#" class="menu-logo" aria-label="트레이딩 콘솔 홈">
@@ -39,20 +39,43 @@
       </div>
     </nav>
     <div class="page-shell">
-      <header>
-        <p class="eyebrow">GitHub Pages · 차콜 그레이 테마</p>
-        <h1>한국 주식 &amp; ETF 트레이딩 콘솔</h1>
-        <p>
-          삼성전자·SK하이닉스와 TIGER S&amp;P500·TIGER 나스닥100의 기술적 지표를 기반으로 매매 추천 점수와 자동 모의투자 현황을
-          확인하세요. 차트는 최근 20거래일을 기본으로 최대 3개월까지 확장할 수 있으며, 20분 주기로 최신 데이터가 반영됩니다.
-        </p>
+      <header class="site-hero">
+        <div class="hero-content">
+          <p class="eyebrow">GitHub Pages · Charcoal Gray Dark Theme</p>
+          <h1>한국 주식 &amp; ETF 트레이딩 콘솔</h1>
+          <p>
+            삼성전자·SK하이닉스와 TIGER S&amp;P500·TIGER 나스닥100의 기술적 지표를 기반으로 매매 추천 점수와 자동 모의투자 현황을
+            확인하세요. 차트는 최근 20거래일을 기본으로 최대 3개월까지 확장할 수 있으며, 20분 주기로 최신 데이터가 반영됩니다.
+          </p>
+          <div class="hero-actions" role="group" aria-label="대시보드 주요 작업">
+            <button type="button" id="refresh-dashboard" class="button accent-button">데이터 새로고침</button>
+            <a class="button ghost-button" href="#portfolio-overview">포트폴리오 보기</a>
+          </div>
+        </div>
+        <div class="hero-stats" aria-label="대시보드 핵심 지표" role="list">
+          <div class="hero-stat" role="listitem">
+            <span class="hero-stat-label">총 자산</span>
+            <strong id="hero-total-value">--</strong>
+            <p id="hero-total-value-note">실시간 평가 기준</p>
+          </div>
+          <div class="hero-stat" role="listitem">
+            <span class="hero-stat-label">누적 손익</span>
+            <strong id="hero-profit" class="neutral">--</strong>
+            <p id="hero-profit-note">초기 자본 대비 변화</p>
+          </div>
+          <div class="hero-stat" role="listitem">
+            <span class="hero-stat-label">자동 갱신</span>
+            <strong id="hero-update-frequency">--</strong>
+            <p id="hero-update-note">브라우저 활성화 시 자동으로 새로고침됩니다.</p>
+          </div>
+        </div>
       </header>
 
       <section id="portfolio-overview" class="portfolio-overview" aria-live="polite"></section>
 
       <nav class="tab-nav" id="category-nav" role="tablist" aria-label="종목 분류"></nav>
 
-      <main id="main-content" aria-live="polite"></main>
+      <main id="dashboard" aria-live="polite"></main>
 
       <footer>
         <p>

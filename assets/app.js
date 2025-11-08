@@ -5,12 +5,38 @@ const dashboard = document.getElementById('dashboard');
 const categoryNav = document.getElementById('category-nav');
 const lastUpdated = document.getElementById('last-updated');
 const portfolioOverview = document.getElementById('portfolio-overview');
+const manualRefreshButton = document.getElementById('refresh-dashboard');
+const heroTotalValue = document.getElementById('hero-total-value');
+const heroTotalValueNote = document.getElementById('hero-total-value-note');
+const heroProfitValue = document.getElementById('hero-profit');
+const heroProfitNote = document.getElementById('hero-profit-note');
+const heroUpdateFrequency = document.getElementById('hero-update-frequency');
+const heroUpdateNote = document.getElementById('hero-update-note');
 
 const DEFAULT_CHART_DAYS = 30;
 const MAX_CHART_DAYS = 180;
 const CHART_RANGE_STEP = 5;
 const BUY_THRESHOLD = 80;
 const SELL_THRESHOLD = 20;
+
+const HERO_DEFAULT_TOTAL_NOTE = '실시간 평가 기준';
+const HERO_DEFAULT_PROFIT_NOTE = '초기 자본 대비 변화';
+const REFRESH_MINUTES = Math.round(REFRESH_INTERVAL / 60000);
+const refreshIntervalFormatter = new Intl.NumberFormat('ko-KR');
+const formattedRefreshMinutes =
+  Number.isFinite(REFRESH_MINUTES) && REFRESH_MINUTES > 0
+    ? refreshIntervalFormatter.format(REFRESH_MINUTES)
+    : null;
+
+if (heroUpdateFrequency) {
+  heroUpdateFrequency.textContent = formattedRefreshMinutes ? `${formattedRefreshMinutes}분` : '--';
+}
+
+if (heroUpdateNote) {
+  heroUpdateNote.textContent = formattedRefreshMinutes
+    ? `브라우저 활성화 시 ${formattedRefreshMinutes}분 간격으로 최신화됩니다.`
+    : '브라우저 활성화 시 자동으로 새로고침됩니다.';
+}
 
 const dateLabelFormatter = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
@@ -50,6 +76,109 @@ const percentFormatter = new Intl.NumberFormat('ko-KR', {
   minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 });
+
+function formatSignedCurrency(value, formatter) {
+  if (value == null || Number.isNaN(value) || !Number.isFinite(value) || !formatter) {
+    return null;
+  }
+
+  const absolute = Math.abs(value);
+  const formatted = formatter.format(absolute);
+  if (value > 0) {
+    return `+${formatted}`;
+  }
+  if (value < 0) {
+    return `-${formatted}`;
+  }
+  return formatter.format(0);
+}
+
+function formatSignedPercent(value) {
+  if (value == null || Number.isNaN(value) || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const absolute = Math.abs(value);
+  const formatted = percentFormatter.format(absolute);
+  if (value > 0) {
+    return `+${formatted}`;
+  }
+  if (value < 0) {
+    return `-${formatted}`;
+  }
+  return percentFormatter.format(0);
+}
+
+function resetHeroSummary() {
+  if (heroTotalValue) {
+    heroTotalValue.textContent = '--';
+  }
+
+  if (heroTotalValueNote) {
+    heroTotalValueNote.textContent = HERO_DEFAULT_TOTAL_NOTE;
+  }
+
+  if (heroProfitValue) {
+    heroProfitValue.textContent = '--';
+    heroProfitValue.classList.remove('positive', 'negative', 'neutral');
+    heroProfitValue.classList.add('neutral');
+  }
+
+  if (heroProfitNote) {
+    heroProfitNote.textContent = HERO_DEFAULT_PROFIT_NOTE;
+  }
+}
+
+function applyHeroSummary({ totalValue, updatedAt, profitLoss, profitRatio, formatter }) {
+  if (heroTotalValue) {
+    if (totalValue != null && formatter) {
+      heroTotalValue.textContent = formatter.format(totalValue);
+    } else {
+      heroTotalValue.textContent = '--';
+    }
+  }
+
+  if (heroTotalValueNote) {
+    if (updatedAt) {
+      const updatedDate = new Date(updatedAt);
+      heroTotalValueNote.textContent = Number.isNaN(updatedDate.getTime())
+        ? HERO_DEFAULT_TOTAL_NOTE
+        : `${updatedDate.toLocaleString('ko-KR')} 기준`;
+    } else {
+      heroTotalValueNote.textContent = HERO_DEFAULT_TOTAL_NOTE;
+    }
+  }
+
+  const percentDisplay = formatSignedPercent(profitRatio);
+
+  if (heroProfitNote) {
+    heroProfitNote.textContent = percentDisplay ? `누적 수익률 ${percentDisplay}` : HERO_DEFAULT_PROFIT_NOTE;
+  }
+
+  if (heroProfitValue) {
+    heroProfitValue.classList.remove('positive', 'negative', 'neutral');
+
+    if (profitLoss != null && formatter) {
+      const signedValue = formatSignedCurrency(profitLoss, formatter);
+      heroProfitValue.textContent = signedValue
+        ? percentDisplay
+          ? `${signedValue} (${percentDisplay})`
+          : signedValue
+        : '--';
+
+      if (profitLoss > 0) {
+        heroProfitValue.classList.add('positive');
+      } else if (profitLoss < 0) {
+        heroProfitValue.classList.add('negative');
+      } else {
+        heroProfitValue.classList.add('neutral');
+      }
+    } else {
+      heroProfitValue.textContent = '--';
+      heroProfitValue.classList.add('neutral');
+    }
+  }
+}
 
 const SIGNAL_LABELS = {
   trend: '추세',
@@ -958,6 +1087,7 @@ function renderPortfolioOverview(summary) {
   }
 
   portfolioOverview.innerHTML = '';
+  resetHeroSummary();
 
   const card = document.createElement('section');
   card.className = 'overview-card card';
@@ -1039,6 +1169,16 @@ function renderPortfolioOverview(summary) {
     totalValue != null && initialTotal != null ? Number(totalValue) - Number(initialTotal) : null;
   const profitRatio =
     profitLoss != null && initialTotal ? profitLoss / Number(initialTotal) : null;
+  const signedProfitText = formatSignedCurrency(profitLoss, formatter);
+  const percentText = formatSignedPercent(profitRatio);
+
+  applyHeroSummary({
+    totalValue,
+    updatedAt: summary.updated_at ?? null,
+    profitLoss,
+    profitRatio,
+    formatter,
+  });
 
   if (profitLoss != null) {
     const profit = document.createElement('p');
@@ -1052,22 +1192,11 @@ function renderPortfolioOverview(summary) {
       profit.classList.add('neutral');
     }
 
-    const signedValue =
-      profitLoss > 0
-        ? `+${formatter.format(Math.abs(profitLoss))}`
-        : profitLoss < 0
-          ? `-${formatter.format(Math.abs(profitLoss))}`
-          : formatter.format(0);
-    const percentText =
-      profitRatio != null
-        ? `${profitRatio > 0 ? '+' : profitRatio < 0 ? '-' : ''}${percentFormatter.format(
-            Math.abs(profitRatio)
-          )}`
-        : '';
+    const displayValue = signedProfitText ?? formatter.format(0);
 
     profit.textContent = percentText
-      ? `누적 손익: ${signedValue} (${percentText})`
-      : `누적 손익: ${signedValue}`;
+      ? `누적 손익: ${displayValue} (${percentText})`
+      : `누적 손익: ${displayValue}`;
 
     card.appendChild(profit);
   }
@@ -1127,6 +1256,7 @@ function renderError(message) {
   categoryNav.innerHTML = '';
   categoryPanels.clear();
   activeCategory = null;
+  resetHeroSummary();
 
   if (portfolioOverview) {
     portfolioOverview.innerHTML = '';
@@ -1188,12 +1318,36 @@ function handleVisibilityChange() {
 }
 
 async function init() {
+  if (manualRefreshButton) {
+    manualRefreshButton.addEventListener('click', handleManualRefresh);
+  }
+
   await refreshDashboard(true);
   scheduleAutoRefresh();
   document.addEventListener('visibilitychange', handleVisibilityChange);
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+async function handleManualRefresh(event) {
+  const target = event?.currentTarget;
+  if (!(target instanceof HTMLButtonElement)) {
+    return;
+  }
+
+  target.classList.add('loading');
+  target.setAttribute('aria-busy', 'true');
+  target.disabled = true;
+
+  try {
+    await refreshDashboard(true);
+  } finally {
+    scheduleAutoRefresh();
+    target.classList.remove('loading');
+    target.removeAttribute('aria-busy');
+    target.disabled = false;
+  }
+}
 
 // Menu toggle functionality
 const menuToggle = document.getElementById('menu-toggle');

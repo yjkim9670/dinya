@@ -30,7 +30,7 @@ GitHub Pages로 배포되는 차콜 그레이 테마의 트레이딩 콘솔입�
 ├── README.md                      # 프로젝트 설명 (본 문서)
 ├── assets/
 │   ├── app.js                     # 프런트엔드 로직, 탭/지표/시그널 및 모의투자 카드 구성
-│   └── styles.css                 # AdminLTE 톤 UI 스타일 정의
+│   └── styles.css                 # Charcoal Gray Dark Theme UI 스타일 정의
 ├── data/
 │   ├── history/                   # 종목별 일별 CSV 누적(자동 생성)
 │   ├── latest.json                # 대시보드가 사용하는 최신 스냅샷
@@ -86,7 +86,7 @@ GitHub Pages로 배포되는 차콜 그레이 테마의 트레이딩 콘솔입�
 - **지표/시그널**: `createCard` 함수가 지표 그리드와 시그널 태그, 추천 점수 섹션을 구성합니다. 데이터 스키마를 변경할 경우 `scripts/fetch_market_data.py`와 `data/latest.json`을 함께 수정하세요.
 - **차트 구간**: `DEFAULT_CHART_DAYS`, `MAX_CHART_DAYS` 상수를 조정하면 슬라이더 범위를 변경할 수 있습니다. 사용자 조작 값은 심볼별로 기억되므로 자동 새로고침 후에도 유지됩니다.
 - **포트폴리오 요약**: `renderPortfolioOverview`와 `createPortfolioSection`이 `portfolio_summary` 및 `ticker.portfolio` 데이터를 사용합니다. JSON 구조를 바꾸면 두 함수를 함께 수정하세요.
-- **스타일 가이드**: `assets/styles.css`는 AdminLTE 톤의 밝은 팔레트와 박스형 레이아웃을 정의합니다. 배지/버튼 색상 대비를 유지하면서 확장하세요.
+- **스타일 가이드**: `assets/styles.css`는 Charcoal Gray Dark Theme 디자인 시스템을 구현합니다. CSS 변수로 컬러·그라데이션·음영을 관리하므로 동일한 톤을 유지하며 확장하세요.
 - **뉴스 연동**: 스냅샷에 제목·링크가 없는 경우 카드에 안내 문구만 노출됩니다. 뉴스 데이터를 수집하려면 `fetch_market_data.py`에서 RSS(예: 네이버 금융) 또는 뉴스 API를 호출해 `ticker.news` 배열에 `title`, `publisher`, `link`, `published_at`을 채우세요.
 - **접근성**: 탭은 ARIA `tablist`/`tabpanel` 패턴을 사용합니다. 새로운 컴포넌트 추가 시 동일한 접근성 속성을 유지하세요.
 

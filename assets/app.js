@@ -57,6 +57,12 @@ const CATEGORY_DEFINITIONS = [
     description: 'TIGER S&P500과 TIGER 나스닥100 ETF를 통해 해외 증시 트렌드를 추적합니다.',
     symbols: ['360750.KS', '133690.KS'],
   },
+  {
+    id: 'digital-assets',
+    label: '디지털 자산',
+    description: '비트코인, 이더리움, 솔라나 등 주요 디지털 자산 흐름을 확인합니다.',
+    symbols: ['BTC-USD', 'ETH-USD', 'SOL-USD'],
+  },
 ];
 
 let activeCategory = CATEGORY_DEFINITIONS[0]?.id ?? null;
@@ -862,12 +868,12 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
         x: {
           type: 'time',
           ticks: {
-            color: '#a0a4ab',
+            color: '#8b949e',
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: 8,
             font: {
-              family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              family: "'Mona Sans', 'Hubot Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans KR', sans-serif",
             },
           },
           time: {
@@ -875,21 +881,21 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
             unit: rangeDays > 90 ? 'month' : 'day',
           },
           grid: {
-            color: '#3a3f4b',
+            color: '#21262d',
           },
         },
         y: {
           ticks: {
-            color: '#a0a4ab',
+            color: '#8b949e',
             font: {
-              family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              family: "'Mona Sans', 'Hubot Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans KR', sans-serif",
             },
             callback(value) {
               return priceFormatter.format(value);
             },
           },
           grid: {
-            color: '#3a3f4b',
+            color: '#21262d',
           },
         },
       },
@@ -898,27 +904,27 @@ function renderChart(canvas, ticker, rangeDays = DEFAULT_CHART_DAYS) {
           display: true,
           position: 'top',
           labels: {
-            color: '#e4e6eb',
+            color: '#c9d1d9',
             usePointStyle: true,
             padding: 15,
             font: {
               size: 11,
-              family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              family: "'Mona Sans', 'Hubot Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans KR', sans-serif",
             },
           },
         },
         tooltip: {
           displayColors: true,
-          backgroundColor: 'rgba(37, 41, 48, 0.95)',
-          titleColor: '#e4e6eb',
-          bodyColor: '#e4e6eb',
-          borderColor: '#3a3f4b',
+          backgroundColor: 'rgba(22, 27, 34, 0.95)',
+          titleColor: '#c9d1d9',
+          bodyColor: '#c9d1d9',
+          borderColor: '#30363d',
           borderWidth: 1,
           titleFont: {
-            family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            family: "'Mona Sans', 'Hubot Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans KR', sans-serif",
           },
           bodyFont: {
-            family: "'Source Sans Pro', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            family: "'Mona Sans', 'Hubot Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans KR', sans-serif",
           },
           callbacks: {
             title(context) {

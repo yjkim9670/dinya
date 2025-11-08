@@ -401,7 +401,15 @@ def format_timestamp(index: Iterable[pd.Timestamp]) -> List[str]:
 
 
 def download_history(ticker: yf.Ticker, symbol: str) -> pd.DataFrame:
-    history = ticker.history(period='9mo', interval='1d', auto_adjust=False)
+    try:
+        history = ticker.history(period='9mo', interval='1d', auto_adjust=False, raise_errors=True)
+    except Exception as exc:
+        logging.error('Failed to fetch history for %s: %s', symbol, exc)
+        # Retry with different parameters
+        try:
+            history = ticker.history(period='6mo', interval='1d', auto_adjust=False)
+        except Exception as retry_exc:
+            raise RuntimeError(f'No price data returned for {symbol} after retry: {retry_exc}') from retry_exc
 
     if history.empty:
         raise RuntimeError(f'No price data returned for {symbol}')
@@ -514,44 +522,20 @@ def fetch_news(symbol: str, metadata: Dict[str, str], ticker: yf.Ticker) -> List
     news_items: List[Dict[str, str | None]] = []
 
     try:
-        primary_news = ticker.news or []
-    except Exception as exc:  # noqa: BLE001 - log and continue
+        # Get news with timeout
+        primary_news = getattr(ticker, 'news', []) or []
+        if callable(primary_news):
+            primary_news = primary_news()
+    except (AttributeError, TypeError, Exception) as exc:  # noqa: BLE001 - log and continue
         logging.warning('Primary news lookup failed for %s: %s', symbol, exc)
         primary_news = []
 
     for item in primary_news:
-        publish_time = item.get('providerPublishTime')
-        published_at = (
-            datetime.fromtimestamp(publish_time, tz=UTC_TZ).isoformat()
-            if publish_time
-            else None
-        )
-        news_items.append(
-            {
-                'title': item.get('title'),
-                'publisher': item.get('publisher'),
-                'link': item.get('link'),
-                'published_at': published_at,
-            }
-        )
-
-    if len(news_items) >= 5:
-        return news_items[:5]
-
-    query = metadata.get('name') or symbol
-    try:
-        response = requests.get(
-            'https://query1.finance.yahoo.com/v1/finance/search',
-            params={'q': query, 'lang': 'ko-KR', 'newsCount': 5},
-            timeout=10,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        for item in payload.get('news', []):
-            published_raw = item.get('providerPublishTime') or item.get('pubtime')
+        try:
+            publish_time = item.get('providerPublishTime')
             published_at = (
-                datetime.fromtimestamp(published_raw, tz=UTC_TZ).isoformat()
-                if published_raw
+                datetime.fromtimestamp(publish_time, tz=UTC_TZ).isoformat()
+                if publish_time
                 else None
             )
             news_items.append(
@@ -562,6 +546,44 @@ def fetch_news(symbol: str, metadata: Dict[str, str], ticker: yf.Ticker) -> List
                     'published_at': published_at,
                 }
             )
+        except Exception as exc:  # noqa: BLE001
+            logging.warning('Failed to parse news item for %s: %s', symbol, exc)
+            continue
+
+    if len(news_items) >= 5:
+        return news_items[:5]
+
+    query = metadata.get('name') or symbol
+    try:
+        response = requests.get(
+            'https://query2.finance.yahoo.com/v1/finance/search',
+            params={'q': query, 'lang': 'ko-KR', 'newsCount': 5, 'quotesCount': 0},
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+            },
+            timeout=15,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        for item in payload.get('news', []):
+            try:
+                published_raw = item.get('providerPublishTime') or item.get('pubtime')
+                published_at = (
+                    datetime.fromtimestamp(published_raw, tz=UTC_TZ).isoformat()
+                    if published_raw
+                    else None
+                )
+                news_items.append(
+                    {
+                        'title': item.get('title'),
+                        'publisher': item.get('publisher'),
+                        'link': item.get('link'),
+                        'published_at': published_at,
+                    }
+                )
+            except Exception as exc:  # noqa: BLE001
+                logging.warning('Failed to parse fallback news item for %s: %s', symbol, exc)
+                continue
     except Exception as exc:  # noqa: BLE001 - best-effort fallback
         logging.warning('Fallback news lookup failed for %s: %s', symbol, exc)
 

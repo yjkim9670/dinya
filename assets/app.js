@@ -60,8 +60,8 @@ const CATEGORY_DEFINITIONS = [
   {
     id: 'digital-assets',
     label: '디지털 자산',
-    description: '비트코인, 이더리움, 솔라나 등 주요 디지털 자산 흐름을 확인합니다.',
-    symbols: ['BTC-USD', 'ETH-USD', 'SOL-USD'],
+    description: '업비트 원화 시세 기반으로 비트코인, 이더리움, 솔라나를 모니터링합니다.',
+    symbols: ['KRW-BTC', 'KRW-ETH', 'KRW-SOL'],
   },
 ];
 
@@ -673,44 +673,6 @@ function createCard(ticker) {
 
   signalsSection.appendChild(tags);
 
-  const newsSection = document.createElement('section');
-  newsSection.className = 'news';
-
-  const newsTitle = document.createElement('h3');
-  newsTitle.textContent = '관련 뉴스';
-  newsSection.appendChild(newsTitle);
-
-  const newsList = document.createElement('ul');
-
-  const validNews = Array.isArray(ticker.news)
-    ? ticker.news.filter((item) => item && item.title && item.link)
-    : [];
-
-  if (validNews.length > 0) {
-    validNews.forEach((item) => {
-      const li = document.createElement('li');
-      const link = document.createElement('a');
-      link.href = item.link;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      const title = document.createElement('strong');
-      title.textContent = item.title;
-      const meta = document.createElement('span');
-      meta.textContent = `${item.publisher ?? '출처 미상'} · ${formatRelativeTime(item.published_at)}`;
-      link.append(title, meta);
-      li.appendChild(link);
-      newsList.appendChild(li);
-    });
-  } else {
-    const li = document.createElement('li');
-    li.className = 'news-empty';
-    li.innerHTML =
-      '<span>표시할 뉴스가 없습니다. RSS 또는 뉴스 API를 <code>scripts/fetch_market_data.py</code>에 연동하면 링크를 노출할 수 있습니다.</span>';
-    newsList.appendChild(li);
-  }
-
-  newsSection.appendChild(newsList);
-
   const recommendationSection = createRecommendationSection(ticker);
   const portfolioSection = createPortfolioSection(ticker, priceFormatter);
 
@@ -721,8 +683,7 @@ function createCard(ticker) {
     recommendationSection,
     portfolioSection,
     indicatorSection,
-    signalsSection,
-    newsSection
+    signalsSection
   );
 
   const handleRangeChange = (event) => {

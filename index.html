@@ -1,1608 +1,919 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>포트폴리오 트레이딩 콘솔</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --bg-primary: #1e1e1e;
-      --bg-secondary: #2a2a2a;
-      --bg-elevated: #252525;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --accent-blue: #00bcd4;
-      --accent-blue-dark: #0093a5;
-      --text-primary: #ffffff;
-      --text-secondary: #b0b0b0;
-      --success: #4caf50;
-      --danger: #f44336;
-      --warning: #ff9800;
-      --info: #4dd0e1;
-      --shadow-md: 0 20px 40px rgba(0, 0, 0, 0.25);
-      --radius-lg: 18px;
-      --radius-md: 14px;
-      --radius-sm: 10px;
-      --transition: 0.25s ease;
-      --font-sans: 'Noto Sans KR', 'Spoqa Han Sans Neo', 'Apple SD Gothic Neo', sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: var(--font-sans);
-      background: radial-gradient(circle at top, rgba(0, 188, 212, 0.12), transparent 45%), var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.5;
-      display: flex;
-      flex-direction: column;
-    }
-
-    a {
-      color: inherit;
-    }
-
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 32px;
-      background: rgba(30, 30, 30, 0.95);
-      backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-    }
-
-    .navbar h1 {
-      font-size: 1.45rem;
-      margin: 0;
-      letter-spacing: 0.02em;
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .nav-actions button {
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      transition: background var(--transition), color var(--transition);
-    }
-
-    .nav-actions button:hover,
-    .nav-actions button:focus {
-      background: rgba(0, 188, 212, 0.12);
-      color: var(--text-primary);
-      outline: none;
-    }
-
-    .hamburger {
-      display: none;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 1px solid transparent;
-      justify-content: center;
-      align-items: center;
-      transition: background var(--transition), border-color var(--transition);
-    }
-
-    .hamburger svg {
-      width: 22px;
-      height: 22px;
-    }
-
-    .hamburger[aria-expanded="true"] {
-      background: rgba(0, 188, 212, 0.16);
-      border-color: rgba(0, 188, 212, 0.45);
-    }
-
-    .container {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 28px;
-      padding: 28px 32px 48px;
-    }
-
-    .sidebar {
-      background: linear-gradient(160deg, rgba(47, 47, 47, 0.96), rgba(32, 32, 32, 0.98));
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-md);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      max-height: calc(100vh - 120px);
-      position: sticky;
-      top: 120px;
-      overflow: hidden auto;
-    }
-
-    .sidebar.collapsed {
-      display: none;
-    }
-
-    .summary-card,
-    .holding-card {
-      background: rgba(38, 38, 38, 0.96);
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 18px;
-      transition: transform var(--transition), box-shadow var(--transition);
-    }
-
-    .summary-card:hover,
-    .holding-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 14px;
-    }
-
-    .summary-metric span {
-      display: block;
-    }
-
-    .summary-label {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-
-    .summary-value {
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-
-    .summary-change {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .holdings-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .holding-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .holding-title {
-      font-weight: 600;
-      font-size: 1.05rem;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .badge.hold {
-      background: rgba(189, 189, 189, 0.14);
-      color: var(--text-secondary);
-    }
-
-    .badge.buy {
-      background: rgba(76, 175, 80, 0.18);
-      color: var(--success);
-    }
-
-    .badge.sell {
-      background: rgba(255, 152, 0, 0.18);
-      color: var(--warning);
-    }
-
-    .badge.exit {
-      background: rgba(244, 67, 54, 0.18);
-      color: var(--danger);
-    }
-
-    .holding-body {
-      margin-top: 12px;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      font-size: 0.85rem;
-    }
-
-    .holding-body span {
-      color: var(--text-secondary);
-    }
-
-    .chart-container {
-      background: rgba(38, 38, 38, 0.95);
-      border-radius: var(--radius-md);
-      padding: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .main-content {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .tabs {
-      display: inline-flex;
-      background: rgba(39, 39, 39, 0.8);
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 6px;
-      width: fit-content;
-    }
-
-    .tab-btn {
-      position: relative;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 10px 20px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: color var(--transition);
-    }
-
-    .tab-btn:focus-visible {
-      outline: 2px solid var(--accent-blue);
-      outline-offset: 2px;
-    }
-
-    .tab-btn.active {
-      color: var(--text-primary);
-    }
-
-    .tab-btn.active::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(0, 188, 212, 0.45), rgba(0, 188, 212, 0.15));
-      border-radius: 999px;
-      z-index: -1;
-      box-shadow: 0 10px 24px rgba(0, 188, 212, 0.25);
-    }
-
-    .ticker-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-    }
-
-    .ticker-card {
-      background: rgba(36, 36, 36, 0.95);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: var(--shadow-md);
-      transition: transform var(--transition), box-shadow var(--transition);
-      animation: card-enter 0.4s ease;
-    }
-
-    .ticker-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 22px 38px rgba(0, 0, 0, 0.35);
-    }
-
-    @keyframes card-enter {
-      from {
-        opacity: 0;
-        transform: translateY(16px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .ticker-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .ticker-title {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .ticker-title h2 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .ticker-title span {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .change-positive {
-      color: var(--success);
-    }
-
-    .change-negative {
-      color: var(--danger);
-    }
-
-    .info-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .indicator-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      font-size: 0.85rem;
-    }
-
-    .indicator-item strong {
-      display: block;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-
-    .score-badge {
-      align-self: flex-start;
-      border-radius: 12px;
-      padding: 6px 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .score-strong-buy {
-      background: rgba(76, 175, 80, 0.2);
-      color: var(--success);
-    }
-
-    .score-buy {
-      background: rgba(0, 188, 212, 0.2);
-      color: var(--accent-blue);
-    }
-
-    .score-neutral {
-      background: rgba(176, 176, 176, 0.2);
-      color: var(--text-secondary);
-    }
-
-    .score-sell {
-      background: rgba(255, 152, 0, 0.2);
-      color: var(--warning);
-    }
-
-    .score-strong-sell {
-      background: rgba(244, 67, 54, 0.2);
-      color: var(--danger);
-    }
-
-    .portfolio-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      color: var(--accent-blue);
-      background: rgba(0, 188, 212, 0.15);
-      border-radius: 999px;
-      padding: 4px 10px;
-    }
-
-    .card-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .btn-primary,
-    .btn-secondary,
-    .btn-danger {
-      border: none;
-      border-radius: var(--radius-sm);
-      padding: 10px 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-blue), #33c9dd);
-      color: #031a1e;
-      box-shadow: 0 12px 24px rgba(0, 188, 212, 0.25);
-    }
-
-    .btn-primary:hover,
-    .btn-primary:focus {
-      background: linear-gradient(135deg, var(--accent-blue-dark), #17a9bc);
-      transform: translateY(-2px);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-secondary);
-    }
-
-    .btn-secondary:hover,
-    .btn-secondary:focus {
-      background: rgba(255, 255, 255, 0.14);
-      color: var(--text-primary);
-      transform: translateY(-2px);
-    }
-
-    .btn-danger {
-      background: rgba(244, 67, 54, 0.18);
-      color: var(--danger);
-      border: 1px solid rgba(244, 67, 54, 0.3);
-    }
-
-    .btn-danger:hover,
-    .btn-danger:focus {
-      background: rgba(244, 67, 54, 0.28);
-      transform: translateY(-2px);
-    }
-
-    .range-control {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .range-control input[type="range"] {
-      flex: 1;
-      accent-color: var(--accent-blue);
-    }
-
-    .portfolio-holding-summary {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      font-size: 0.8rem;
-      background: rgba(0, 188, 212, 0.08);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-      color: var(--accent-blue);
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.55);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 40;
-      transition: opacity var(--transition);
-    }
-
-    .modal.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .modal-content {
-      width: min(420px, calc(100vw - 40px));
-      background: rgba(40, 40, 40, 0.96);
-      border-radius: var(--radius-lg);
-      padding: 26px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 28px 50px rgba(0, 0, 0, 0.45);
-    }
-
-    .modal-content h2 {
-      margin-top: 0;
-    }
-
-    .modal label {
-      display: block;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-      color: var(--text-secondary);
-    }
-
-    .modal input[type="number"] {
-      width: 100%;
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      font-size: 0.95rem;
-    }
-
-    .modal input[type="number"]:focus {
-      outline: 2px solid rgba(0, 188, 212, 0.45);
-      border-color: rgba(0, 188, 212, 0.35);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
-
-    @media (max-width: 1279px) {
-      .container {
-        grid-template-columns: 320px 1fr;
-      }
-    }
-
-    @media (max-width: 1023px) {
-      .container {
-        grid-template-columns: 260px 1fr;
-        padding: 24px;
-      }
-
-      .sidebar {
-        top: 110px;
-      }
-    }
-
-    @media (max-width: 767px) {
-      .navbar {
-        padding: 16px 20px;
-      }
-
-      .container {
-        grid-template-columns: 1fr;
-        padding: 18px;
-      }
-
-      .sidebar {
-        position: relative;
-        top: auto;
-        max-height: none;
-        order: -1;
-        display: none;
-      }
-
-      .sidebar.mobile-open {
-        display: flex;
-      }
-
-      .hamburger {
-        display: inline-flex;
-      }
-
-      .ticker-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .tabs {
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      .tab-btn {
-        flex: 1;
-        text-align: center;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포트폴리오 트레이딩 콘솔</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2a2a2a;
+            --bg-tertiary: #333333;
+            --accent-blue: #00bcd4;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --border-color: #444444;
+            --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /* --- 기본 및 레이아웃 --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .navbar {
+            grid-column: 1 / -1;
+            background-color: var(--bg-secondary);
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+        }
+
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            font-size: 2rem;
+        }
+
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
+        }
+
+        .main-content {
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        /* --- 카드 공통 스타일 --- */
+        .card {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* --- 사이드바 --- */
+        #portfolio-summary .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        #portfolio-summary .summary-item span:first-child {
+            color: var(--text-secondary);
+        }
+
+        #holdings-list .holding-item {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            background-color: var(--bg-tertiary);
+            transition: background-color 0.2s;
+        }
+        
+        #holdings-list .holding-item:hover {
+            background-color: #444;
+        }
+
+        .holding-item-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        .holding-item-details, .holding-item-pnl {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.2rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .holding-item-pnl {
+            font-weight: bold;
+        }
+
+        .holding-item-footer {
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- 메인 콘텐츠 --- */
+        .tabs {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-blue);
+            color: var(--bg-primary);
+            font-weight: bold;
+            border-color: var(--accent-blue);
+        }
+
+        .ticker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+
+        .ticker-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .ticker-card.holding {
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .ticker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .ticker-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .ticker-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .ticker-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .ticker-indicators {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .ticker-chart-container {
+            height: 150px;
+        }
+
+        .ticker-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        /* --- 유틸리티 & 컴포넌트 --- */
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-secondary { color: var(--text-secondary); }
+
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+        .badge-buy { background-color: var(--success); }
+        .badge-sell { background-color: var(--danger); }
+        .badge-hold { background-color: var(--warning); }
+        .badge-neutral { background-color: #607d8b; }
+        .badge-holding { background-color: var(--accent-blue); color: var(--bg-primary); }
+
+        .btn {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.8; }
+        .btn-primary { background-color: var(--accent-blue); color: var(--bg-primary); }
+        .btn-secondary { background-color: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-danger { background-color: var(--danger); color: var(--text-primary); }
+        .btn-full { width: 100%; }
+
+        /* --- 모달 --- */
+        .modal {
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal.visible .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            color: var(--accent-blue);
+        }
+        
+        #holding-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        #holding-form input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* --- 반응형 디자인 --- */
+        @media (max-width: 1023px) {
+            .container {
+                grid-template-columns: 250px 1fr;
+            }
+            .ticker-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+                height: auto;
+                min-height: 100vh;
+            }
+            .navbar {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+            .hamburger {
+                display: block;
+            }
+            .sidebar {
+                grid-row: 2;
+                max-height: 0;
+                padding: 0 1rem;
+                overflow: hidden;
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            .sidebar.open {
+                max-height: 1000px; /* 충분히 큰 값 */
+                padding: 1rem;
+                transform: translateY(0);
+                opacity: 1;
+            }
+            .main-content {
+                grid-row: 3;
+            }
+        }
+    </style>
 </head>
 <body>
-  <nav class="navbar" aria-label="상단 내비게이션">
-    <h1>포트폴리오 트레이딩 콘솔</h1>
-    <div class="nav-actions">
-      <button class="hamburger" id="sidebar-toggle" aria-controls="portfolio-sidebar" aria-expanded="false" aria-label="포트폴리오 패널 토글">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-      </button>
-      <button type="button" id="refresh-button">데이터 새로고침</button>
+    <div class="container">
+        <nav class="navbar">
+            <h1>트레이딩 콘솔</h1>
+            <div class="hamburger" id="hamburger-menu">☰</div>
+        </nav>
+
+        <aside class="sidebar" id="sidebar">
+            <div id="portfolio-summary" class="card"></div>
+            <div id="portfolio-chart-container" class="card">
+                <h3 class="card-title">포트폴리오 비중</h3>
+                <canvas id="portfolio-chart"></canvas>
+            </div>
+            <div id="holdings-list-container" class="card">
+                <h3 class="card-title">보유 종목</h3>
+                <div id="holdings-list"></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="stocks">주식</button>
+                <button class="tab-btn" data-tab="etfs">ETF</button>
+                <button class="tab-btn" data-tab="crypto">암호화폐</button>
+            </div>
+            <div id="ticker-grid" class="ticker-grid"></div>
+        </main>
     </div>
-  </nav>
 
-  <div class="container">
-    <aside class="sidebar" id="portfolio-sidebar">
-      <section id="portfolio-summary" aria-live="polite"></section>
-      <section id="holdings-list" aria-live="polite"></section>
-      <section id="portfolio-chart" aria-live="polite"></section>
-    </aside>
-
-    <main class="main-content">
-      <div class="tabs" role="tablist" aria-label="자산 유형 탭">
-        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-stocks" id="tab-stocks" data-tab="stocks">주식</button>
-        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-etfs" id="tab-etfs" data-tab="etfs">ETF</button>
-        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-crypto" id="tab-crypto" data-tab="crypto">암호화폐</button>
-      </div>
-      <div id="ticker-grid" class="ticker-grid" role="tabpanel" tabindex="0" aria-labelledby="tab-stocks"></div>
-    </main>
-  </div>
-
-  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-content">
-      <h2 id="modal-title">포트폴리오에 추가</h2>
-      <form id="holding-form">
-        <label for="quantity">보유 수량</label>
-        <input type="number" id="quantity" step="0.0001" min="0" required aria-required="true">
-        <label for="avgPrice">평균 매수가 (원)</label>
-        <input type="number" id="avgPrice" step="1" min="0" required aria-required="true">
-        <div class="modal-actions">
-          <button type="submit" class="btn-primary">저장</button>
-          <button type="button" class="btn-secondary" id="modal-close">취소</button>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <form id="holding-form">
+                <input type="hidden" id="symbol">
+                <div>
+                    <label for="quantity">보유 수량</label>
+                    <input type="number" id="quantity" step="any" min="0" required>
+                </div>
+                <div>
+                    <label for="avgPrice">평균 매수가 (원)</label>
+                    <input type="number" id="avgPrice" step="any" min="0" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="modal-close">취소</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
         </div>
-      </form>
     </div>
-  </div>
 
-  <script>
-    const STORAGE_KEY = 'tradingConsolePortfolio';
-    let portfolio = { cash: 10000000, holdings: {} };
-    let currentTab = 'stocks';
-    let modalMode = 'add';
-    let modalSymbol = null;
-    const chartInstances = new Map();
-    const chartRanges = new Map();
-    let doughnutChart = null;
+<script>
+// ========== 전역 상태 및 상수 ==========
+let portfolio = { cash: 10000000, holdings: {} };
+let currentTab = 'stocks';
+let chartInstances = {};
+let portfolioDoughnutChart = null;
 
-    const CATEGORY_DEFINITIONS = {
-      stocks: {
-        label: '주식',
-        symbols: ['005930.KS', '000660.KS']
-      },
-      etfs: {
-        label: 'ETF',
-        symbols: ['360750.KS', '133690.KS']
-      },
-      crypto: {
-        label: '암호화폐',
-        symbols: ['BTC-KRW', 'ETH-KRW', 'XRP-KRW', 'SOL-KRW']
-      }
-    };
-
-    function createSeededGenerator(symbol) {
-      let seed = 0;
-      for (let i = 0; i < symbol.length; i++) {
-        seed = (seed << 5) - seed + symbol.charCodeAt(i);
-        seed |= 0;
-      }
-      return function nextRandom() {
-        seed = (seed * 1664525 + 1013904223) % 4294967296;
-        return (seed >>> 0) / 4294967296;
-      };
+// ========== Mock 데이터 생성 ==========
+const generatePriceHistory = (base, volatility, days = 90) => {
+    let prices = [];
+    let currentPrice = base;
+    for (let i = 0; i < days; i++) {
+        prices.push(currentPrice);
+        currentPrice *= 1 + (Math.random() - 0.5) * volatility;
     }
+    return prices.reverse();
+};
 
-    function generatePriceSeries(symbol, basePrice, volatility = 1.5, days = 90) {
-      const rand = createSeededGenerator(symbol);
-      const series = [];
-      let price = basePrice;
-      for (let i = 0; i < days; i++) {
-        const noise = (rand() - 0.5) * volatility * 2;
-        const seasonal = Math.sin(i / 6) * volatility;
-        price = Math.max(0.1, price + seasonal + noise);
-        series.push(parseFloat(price.toFixed(2)));
-      }
-      return series;
+const mockData = {
+    stocks: {
+        "005930.KS": { name: "삼성전자", price: 83000, change: -1.2, volume: 15230000, marketCap: "495조", priceHistory: generatePriceHistory(85000, 0.03), indicators: { sma5: 82500, sma20: 81000, rsi: 55, stochasticK: 60, macd: 150 }, score: 68 },
+        "000660.KS": { name: "SK하이닉스", price: 215000, change: 2.5, volume: 4500000, marketCap: "156조", priceHistory: generatePriceHistory(200000, 0.05), indicators: { sma5: 218000, sma20: 205000, rsi: 72, stochasticK: 85, macd: 2500 }, score: 85 },
+    },
+    etfs: {
+        "360750.KS": { name: "TIGER S&P500", price: 18500, change: 0.8, volume: 800000, marketCap: "5조", priceHistory: generatePriceHistory(18000, 0.02), indicators: { sma5: 18400, sma20: 18200, rsi: 65, stochasticK: 70, macd: 50 }, score: 75 },
+        "133690.KS": { name: "TIGER 나스닥100", price: 112000, change: 1.5, volume: 650000, marketCap: "8조", priceHistory: generatePriceHistory(108000, 0.03), indicators: { sma5: 113000, sma20: 110000, rsi: 70, stochasticK: 80, macd: 800 }, score: 80 },
+    },
+    crypto: {
+        "BTC-KRW": { name: "비트코인", price: 98500000, change: 3.2, volume: 245.7, marketCap: "1,950조", priceHistory: generatePriceHistory(95000000, 0.08), indicators: { sma5: 97000000, sma20: 92000000, rsi: 68, stochasticK: 75, macd: 1500000 }, score: 82 },
+        "ETH-KRW": { name: "이더리움", price: 4850000, change: 2.1, volume: 3500, marketCap: "580조", priceHistory: generatePriceHistory(4700000, 0.1), indicators: { sma5: 4800000, sma20: 4600000, rsi: 62, stochasticK: 65, macd: 80000 }, score: 70 },
+        "XRP-KRW": { name: "리플", price: 680, change: -2.5, volume: 150000000, marketCap: "37조", priceHistory: generatePriceHistory(700, 0.15), indicators: { sma5: 670, sma20: 690, rsi: 35, stochasticK: 25, macd: -5 }, score: 35 },
+        "SOL-KRW": { name: "솔라나", price: 195000, change: 5.5, volume: 850000, marketCap: "90조", priceHistory: generatePriceHistory(180000, 0.12), indicators: { sma5: 198000, sma20: 185000, rsi: 75, stochasticK: 88, macd: 5000 }, score: 92 },
     }
+};
 
-    const mockData = {
-      stocks: {
-        '005930.KS': {
-          name: '삼성전자',
-          priceHistory: generatePriceSeries('005930.KS', 68000, 900),
-          volume: '1,523만주',
-          marketCap: '500조 원'
-        },
-        '000660.KS': {
-          name: 'SK하이닉스',
-          priceHistory: generatePriceSeries('000660.KS', 120000, 1600),
-          volume: '612만주',
-          marketCap: '110조 원'
+// ========== 포트폴리오 관리 함수 ==========
+function loadPortfolio() {
+    try {
+        const savedPortfolio = localStorage.getItem('tradingConsolePortfolio');
+        if (savedPortfolio) {
+            portfolio = JSON.parse(savedPortfolio);
         }
-      },
-      etfs: {
-        '360750.KS': {
-          name: 'TIGER S&P500',
-          priceHistory: generatePriceSeries('360750.KS', 50000, 550),
-          volume: '39만주',
-          marketCap: '3.6조 원'
-        },
-        '133690.KS': {
-          name: 'TIGER 나스닥100',
-          priceHistory: generatePriceSeries('133690.KS', 63000, 620),
-          volume: '28만주',
-          marketCap: '5.1조 원'
-        }
-      },
-      crypto: {
-        'BTC-KRW': {
-          name: '비트코인',
-          priceHistory: generatePriceSeries('BTC-KRW', 87000000, 1800000),
-          volume: '245 BTC',
-          marketCap: '1,950조 원'
-        },
-        'ETH-KRW': {
-          name: '이더리움',
-          priceHistory: generatePriceSeries('ETH-KRW', 5200000, 120000),
-          volume: '7,120 ETH',
-          marketCap: '566조 원'
-        },
-        'XRP-KRW': {
-          name: '리플',
-          priceHistory: generatePriceSeries('XRP-KRW', 700, 22),
-          volume: '32,500,000 XRP',
-          marketCap: '37조 원'
-        },
-        'SOL-KRW': {
-          name: '솔라나',
-          priceHistory: generatePriceSeries('SOL-KRW', 160000, 3800),
-          volume: '98,000 SOL',
-          marketCap: '73조 원'
-        }
-      }
-    };
-
-    function loadPortfolio() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed && typeof parsed === 'object') {
-            portfolio = {
-              cash: typeof parsed.cash === 'number' ? parsed.cash : 10000000,
-              holdings: parsed.holdings && typeof parsed.holdings === 'object' ? parsed.holdings : {}
-            };
-          }
-        }
-      } catch (error) {
-        console.warn('포트폴리오를 불러오는 중 오류가 발생했습니다.', error);
-        alert('포트폴리오 정보를 불러올 수 없어 초기값으로 표시합니다. 브라우저 권한을 확인해주세요.');
-      }
+    } catch (e) {
+        console.error("포트폴리오 로딩 실패:", e);
+        alert("localStorage에서 포트폴리오를 불러오는 데 실패했습니다.");
     }
+}
 
-    function savePortfolio() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(portfolio));
-      } catch (error) {
-        console.error('포트폴리오 저장 실패', error);
-        alert('포트폴리오를 저장하지 못했습니다. 저장 공간 또는 브라우저 권한을 확인해주세요.');
-      }
+function savePortfolio() {
+    try {
+        localStorage.setItem('tradingConsolePortfolio', JSON.stringify(portfolio));
+    } catch (e) {
+        console.error("포트폴리오 저장 실패:", e);
+        alert("localStorage에 포트폴리오를 저장하는 데 실패했습니다.");
     }
+}
 
-    function addHolding(symbol, quantity, avgPrice) {
-      portfolio.holdings[symbol] = {
-        quantity,
-        avgPrice,
-        addedDate: new Date().toISOString().slice(0, 10)
-      };
-      savePortfolio();
-      renderAll();
-    }
+function addOrUpdateHolding(symbol, quantity, avgPrice) {
+    portfolio.holdings[symbol] = { quantity, avgPrice, addedDate: new Date().toISOString() };
+    savePortfolio();
+    renderAll();
+}
 
-    function updateHolding(symbol, quantity, avgPrice) {
-      if (!portfolio.holdings[symbol]) return;
-      portfolio.holdings[symbol].quantity = quantity;
-      portfolio.holdings[symbol].avgPrice = avgPrice;
-      savePortfolio();
-      renderAll();
-    }
-
-    function removeHolding(symbol) {
-      if (portfolio.holdings[symbol]) {
+function removeHolding(symbol) {
+    if (confirm(`${symbol} 종목을 포트폴리오에서 삭제하시겠습니까?`)) {
         delete portfolio.holdings[symbol];
         savePortfolio();
         renderAll();
-      }
     }
+}
 
-    function getAssetData(symbol) {
-      for (const category of Object.keys(mockData)) {
-        if (mockData[category][symbol]) {
-          return mockData[category][symbol];
+
+// ========== 계산 함수 ==========
+const getAssetData = (symbol) => {
+    for (const type in mockData) {
+        if (mockData[type][symbol]) {
+            return mockData[type][symbol];
         }
-      }
-      return null;
     }
+    return null;
+};
 
-    function calculatePortfolioValue() {
-      let holdingsValue = 0;
-      let totalCost = 0;
-      Object.entries(portfolio.holdings).forEach(([symbol, holding]) => {
-        const asset = getAssetData(symbol);
-        if (!asset) return;
-        const currentPrice = getCurrentPrice(asset.priceHistory);
-        holdingsValue += currentPrice * holding.quantity;
-        totalCost += holding.avgPrice * holding.quantity;
-      });
-      const totalValue = holdingsValue + portfolio.cash;
-      const profitValue = holdingsValue - totalCost;
-      const profitPercent = totalCost > 0 ? (profitValue / totalCost) * 100 : 0;
-      return { holdingsValue, totalCost, totalValue, profitValue, profitPercent };
-    }
-
-    function getCurrentPrice(priceHistory) {
-      return priceHistory[priceHistory.length - 1];
-    }
-
-    function getPreviousPrice(priceHistory) {
-      return priceHistory[priceHistory.length - 2] ?? priceHistory[priceHistory.length - 1];
-    }
-
-    function calculateProfitLoss(symbol) {
-      const holding = portfolio.holdings[symbol];
-      const asset = getAssetData(symbol);
-      if (!holding || !asset) return null;
-      const currentPrice = getCurrentPrice(asset.priceHistory);
-      const value = currentPrice * holding.quantity;
-      const cost = holding.avgPrice * holding.quantity;
-      const profit = value - cost;
-      const profitPercent = cost > 0 ? (profit / cost) * 100 : 0;
-      return { value, cost, profit, profitPercent, currentPrice };
-    }
-
-    function calculatePositionSize(symbol) {
-      const metrics = calculatePortfolioValue();
-      const holdingMetrics = calculateProfitLoss(symbol);
-      if (!holdingMetrics) return 0;
-      const base = metrics.totalValue;
-      if (base <= 0) return 0;
-      return holdingMetrics.value / base;
-    }
-
-    function getPositionRecommendation(symbol, score, currentWeight, pnlPercent) {
-      const weightPercent = currentWeight * 100;
-      if (score >= 80 && weightPercent < 5) {
-        return {
-          label: '매수 추가',
-          message: `현재 비중 ${weightPercent.toFixed(1)}% → 권장 비중 10%로 증액`,
-          className: 'buy'
-        };
-      }
-      if (score <= 20) {
-        const formatted = pnlPercent >= 0 ? `+${pnlPercent.toFixed(1)}%` : `${pnlPercent.toFixed(1)}%`;
-        return {
-          label: '전량 매도',
-          message: `손절 권장: 현재 손익 ${formatted}`,
-          className: 'exit'
-        };
-      }
-      if (score >= 20 && score <= 50 && weightPercent >= 15) {
-        return {
-          label: '일부 매도',
-          message: `현재 비중 ${weightPercent.toFixed(1)}% → 권장 비중 5%로 감축`,
-          className: 'sell'
-        };
-      }
-      return {
-        label: '홀드',
-        message: '현재 포지션 유지',
-        className: 'hold'
-      };
-    }
-
-    function calculateSMA(series, length) {
-      if (series.length < length) return null;
-      let sum = 0;
-      for (let i = series.length - length; i < series.length; i++) {
-        sum += series[i];
-      }
-      return sum / length;
-    }
-
-    function calculateSMASequence(series, length) {
-      const values = [];
-      let sum = 0;
-      for (let i = 0; i < series.length; i++) {
-        sum += series[i];
-        if (i >= length) {
-          sum -= series[i - length];
+function calculatePortfolioValue() {
+    let totalHoldingsValue = 0;
+    for (const symbol in portfolio.holdings) {
+        const holding = portfolio.holdings[symbol];
+        const assetData = getAssetData(symbol);
+        if (assetData) {
+            totalHoldingsValue += holding.quantity * assetData.price;
         }
-        if (i >= length - 1) {
-          values.push(sum / length);
-        } else {
-          values.push(null);
-        }
-      }
-      return values;
     }
+    return {
+        totalHoldingsValue,
+        totalAssets: totalHoldingsValue + portfolio.cash
+    };
+}
 
-    function calculateIndicators(priceHistory) {
-      const prices = priceHistory.slice();
-      const len = prices.length;
-      const sma5 = calculateSMA(prices, 5) ?? prices[len - 1];
-      const sma20 = calculateSMA(prices, 20) ?? prices[len - 1];
-
-      let gains = 0;
-      let losses = 0;
-      for (let i = len - 14; i < len; i++) {
-        if (i <= 0) continue;
-        const diff = prices[i] - prices[i - 1];
-        if (diff >= 0) gains += diff; else losses -= diff;
-      }
-      const averageGain = gains / 14;
-      const averageLoss = losses / 14;
-      const rs = averageLoss === 0 ? 100 : averageGain / averageLoss;
-      const rsi = averageLoss === 0 ? 100 : 100 - (100 / (1 + rs));
-
-      const lookback = 14;
-      const recent = prices.slice(-lookback);
-      const highest = Math.max(...recent);
-      const lowest = Math.min(...recent);
-      const stochasticK = highest === lowest ? 50 : ((prices[len - 1] - lowest) / (highest - lowest)) * 100;
-      const stochasticSeries = [];
-      for (let i = lookback - 1; i < prices.length; i++) {
-        const window = prices.slice(i - lookback + 1, i + 1);
-        const high = Math.max(...window);
-        const low = Math.min(...window);
-        const k = high === low ? 50 : ((prices[i] - low) / (high - low)) * 100;
-        stochasticSeries.push(k);
-      }
-      const stochasticD = stochasticSeries.length >= 3
-        ? stochasticSeries.slice(-3).reduce((acc, value) => acc + value, 0) / Math.min(3, stochasticSeries.length)
-        : stochasticK;
-
-      const ema = (period) => {
-        const k = 2 / (period + 1);
-        let emaValue = prices[0];
-        for (let i = 1; i < prices.length; i++) {
-          emaValue = prices[i] * k + emaValue * (1 - k);
-        }
-        return emaValue;
-      };
-      const ema12 = ema(12);
-      const ema26 = ema(26);
-      const macd = ema12 - ema26;
-      const macdSignalSeries = [];
-      let macdValue = 0;
-      let emaFast = prices[0];
-      let emaSlow = prices[0];
-      const kFast = 2 / (12 + 1);
-      const kSlow = 2 / (26 + 1);
-      const signalPeriod = 9;
-      let macdLine = prices[0] - prices[0];
-      for (let i = 1; i < prices.length; i++) {
-        emaFast = prices[i] * kFast + emaFast * (1 - kFast);
-        emaSlow = prices[i] * kSlow + emaSlow * (1 - kSlow);
-        macdLine = emaFast - emaSlow;
-        macdSignalSeries.push(macdLine);
-      }
-      let signal = 0;
-      if (macdSignalSeries.length >= signalPeriod) {
-        signal = macdSignalSeries.slice(-signalPeriod).reduce((acc, val) => acc + val, 0) / signalPeriod;
-      } else if (macdSignalSeries.length > 0) {
-        signal = macdSignalSeries.reduce((acc, val) => acc + val, 0) / macdSignalSeries.length;
-      }
-      const histogram = macd - signal;
-
-      const trend = ((prices[len - 1] - prices[Math.max(0, len - 20)]) / prices[Math.max(0, len - 20)]) * 100;
-      let score = 50;
-      score += Math.tanh(trend / 10) * 18;
-      score += (rsi - 50) * 0.35;
-      score += (stochasticK - 50) * 0.2;
-      score += histogram * 1.5;
-      score = Math.min(100, Math.max(0, score));
-
-      const smaSeries = calculateSMASequence(prices, 5);
-      const signals = [];
-      for (let i = 1; i < prices.length; i++) {
-        const prevSma = smaSeries[i - 1];
-        const currentSma = smaSeries[i];
-        if (prevSma == null || currentSma == null) continue;
-        const prevDiff = prices[i - 1] - prevSma;
-        const currDiff = prices[i] - currentSma;
-        if (prevDiff <= 0 && currDiff > 0) {
-          signals.push({ index: i, type: 'buy', price: prices[i] });
-        }
-        if (prevDiff >= 0 && currDiff < 0) {
-          signals.push({ index: i, type: 'sell', price: prices[i] });
-        }
-      }
-
-      return {
-        sma5,
-        sma20,
-        rsi,
-        stochasticK,
-        stochasticD,
-        macd,
-        signal,
-        histogram,
-        score,
-        smaSeries,
-        signals
-      };
+function calculateTotalPrincipal() {
+    let totalPrincipal = 0;
+    for (const symbol in portfolio.holdings) {
+        const holding = portfolio.holdings[symbol];
+        totalPrincipal += holding.quantity * holding.avgPrice;
     }
+    return totalPrincipal;
+}
 
-    function formatCurrency(value) {
-      return value.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
+/**
+ * 포지션 조정 추천 로직
+ * @param {string} symbol - 종목 심볼
+ * @param {number} score - 기술적 분석 점수 (0-100)
+ * @param {number} currentWeight - 현재 포트폴리오 비중 (%)
+ * @returns {{action: string, message: string, className: string}} 추천 결과
+ */
+function getPositionRecommendation(symbol, score, currentWeight) {
+    const pnl = calculateProfitLoss(symbol);
+    
+    if (score <= 20) {
+        return { action: "전량 매도", message: `손절 권장: 현재 손익 ${pnl.percent.toFixed(2)}%`, className: "badge-sell" };
     }
-
-    function formatNumber(value, fractionDigits = 2) {
-      return Number(value).toLocaleString('ko-KR', {
-        minimumFractionDigits: fractionDigits,
-        maximumFractionDigits: fractionDigits
-      });
+    if (score >= 80 && currentWeight < 5) {
+        return { action: "매수 추가", message: `현재 비중 ${currentWeight.toFixed(1)}% → 권장 비중 10%로 증액`, className: "badge-buy" };
     }
-
-    function renderPortfolioSummary() {
-      const container = document.getElementById('portfolio-summary');
-      const { holdingsValue, totalCost, totalValue, profitValue, profitPercent } = calculatePortfolioValue();
-      container.innerHTML = `
-        <article class="summary-card" aria-label="포트폴리오 요약">
-          <h2 class="sr-only">전체 요약</h2>
-          <div class="summary-grid">
-            <div class="summary-metric">
-              <span class="summary-label">총 자산 평가액</span>
-              <span class="summary-value">₩ ${formatCurrency(totalValue)}</span>
-              <span class="summary-change">현금 포함</span>
-            </div>
-            <div class="summary-metric">
-              <span class="summary-label">총 투자 원금</span>
-              <span class="summary-value">₩ ${formatCurrency(totalCost)}</span>
-              <span class="summary-change">보유 종목 기준</span>
-            </div>
-            <div class="summary-metric">
-              <span class="summary-label">총 평가 손익</span>
-              <span class="summary-value" style="color:${profitValue >= 0 ? 'var(--success)' : 'var(--danger)'}">₩ ${formatCurrency(profitValue)}</span>
-              <span class="summary-change">${profitPercent >= 0 ? '+' : ''}${profitPercent.toFixed(2)}%</span>
-            </div>
-            <div class="summary-metric">
-              <span class="summary-label">현금 잔고</span>
-              <span class="summary-value">₩ ${formatCurrency(portfolio.cash)}</span>
-              <span class="summary-change">조정은 설정 기능에서 관리</span>
-            </div>
-          </div>
-        </article>
-      `;
+    if (score >= 20 && score <= 50 && currentWeight >= 15) {
+        return { action: "일부 매도", message: `현재 비중 ${currentWeight.toFixed(1)}% → 권장 비중 5%로 감축`, className: "badge-sell" };
     }
+    return { action: "홀드", message: "현재 포지션 유지", className: "badge-hold" };
+}
 
-    function renderHoldingsList() {
-      const container = document.getElementById('holdings-list');
-      const entries = Object.entries(portfolio.holdings);
-      if (entries.length === 0) {
-        container.innerHTML = `
-          <article class="summary-card" aria-label="보유 종목 없음">
-            <h2 class="sr-only">보유 종목</h2>
-            <p>보유 중인 종목이 없습니다. 오른쪽 카드에서 \"포트폴리오에 추가\" 버튼으로 자산을 기록하세요.</p>
-          </article>
-        `;
-        return;
-      }
-      const fragments = entries.map(([symbol, holding]) => {
-        const metrics = calculateProfitLoss(symbol);
-        if (!metrics) return '';
-        const asset = getAssetData(symbol);
-        const indicators = calculateIndicators(asset.priceHistory);
-        const weight = calculatePositionSize(symbol);
-        const recommendation = getPositionRecommendation(symbol, indicators.score, weight, metrics.profitPercent);
-        const changeClass = metrics.profit >= 0 ? 'change-positive' : 'change-negative';
-        return `
-          <article class="holding-card" aria-label="${asset.name} 보유 정보">
-            <div class="holding-header">
-              <div>
-                <div class="holding-title">${asset.name}</div>
-                <div class="summary-change">${symbol}</div>
-              </div>
-              <span class="badge ${recommendation.className}">${recommendation.label}</span>
-            </div>
-            <div class="holding-body">
-              <div>
-                <span>보유 수량</span>
-                <strong>${formatNumber(holding.quantity, 4)}</strong>
-              </div>
-              <div>
-                <span>평균 매수가</span>
-                <strong>₩ ${formatCurrency(holding.avgPrice)}</strong>
-              </div>
-              <div>
-                <span>현재가</span>
-                <strong>₩ ${formatCurrency(metrics.currentPrice)}</strong>
-              </div>
-              <div>
-                <span>평가 손익</span>
-                <strong class="${changeClass}">₩ ${formatCurrency(metrics.profit)} (${metrics.profitPercent >= 0 ? '+' : ''}${metrics.profitPercent.toFixed(2)}%)</strong>
-              </div>
-              <div>
-                <span>현재 비중</span>
-                <strong>${(weight * 100).toFixed(2)}%</strong>
-              </div>
-              <div>
-                <span>추천</span>
-                <strong>${recommendation.message}</strong>
-              </div>
-            </div>
-          </article>
-        `;
-      }).join('');
-      container.innerHTML = `
-        <div class="holdings-list" aria-label="보유 종목 목록">
-          ${fragments}
+function calculateProfitLoss(symbol) {
+    const holding = portfolio.holdings[symbol];
+    const assetData = getAssetData(symbol);
+    if (!holding || !assetData) return { amount: 0, percent: 0 };
+
+    const principal = holding.quantity * holding.avgPrice;
+    const currentValue = holding.quantity * assetData.price;
+    const pnlAmount = currentValue - principal;
+    const pnlPercent = principal > 0 ? (pnlAmount / principal) * 100 : 0;
+    return { amount: pnlAmount, percent: pnlPercent };
+}
+
+
+// ========== UI 렌더링 함수 ==========
+function formatCurrency(value, decimals = 0) {
+    return new Intl.NumberFormat('ko-KR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    }).format(value);
+}
+
+function renderPortfolioSummary() {
+    const summaryEl = document.getElementById('portfolio-summary');
+    const { totalHoldingsValue, totalAssets } = calculatePortfolioValue();
+    const totalPrincipal = calculateTotalPrincipal();
+    const totalPnlAmount = totalAssets - portfolio.cash - totalPrincipal;
+    const totalPnlPercent = totalPrincipal > 0 ? (totalPnlAmount / totalPrincipal) * 100 : 0;
+
+    summaryEl.innerHTML = `
+        <h3 class="card-title">요약</h3>
+        <div class="summary-item"><span>총 자산 평가액</span> <span>${formatCurrency(totalAssets)}원</span></div>
+        <div class="summary-item"><span>총 투자 원금</span> <span>${formatCurrency(totalPrincipal)}원</span></div>
+        <div class="summary-item">
+            <span>총 평가 손익</span>
+            <span class="${totalPnlAmount >= 0 ? 'text-success' : 'text-danger'}">
+                ${formatCurrency(totalPnlAmount)}원 (${totalPnlPercent.toFixed(2)}%)
+            </span>
         </div>
-      `;
+        <div class="summary-item"><span>현금 잔고</span> <span>${formatCurrency(portfolio.cash)}원</span></div>
+    `;
+}
+
+function renderHoldingsList() {
+    const listEl = document.getElementById('holdings-list');
+    const { totalAssets } = calculatePortfolioValue();
+    listEl.innerHTML = '';
+
+    const holdingsArray = Object.keys(portfolio.holdings);
+
+    if (holdingsArray.length === 0) {
+        listEl.innerHTML = '<p class="text-secondary">보유 중인 종목이 없습니다.</p>';
+        return;
     }
 
-    function renderPortfolioChart() {
-      const container = document.getElementById('portfolio-chart');
-      const entries = Object.entries(portfolio.holdings);
-      if (entries.length === 0) {
-        container.innerHTML = '';
-        if (doughnutChart) {
-          doughnutChart.destroy();
-          doughnutChart = null;
+    holdingsArray.forEach(symbol => {
+        const holding = portfolio.holdings[symbol];
+        const assetData = getAssetData(symbol);
+        if (!assetData) return;
+
+        const currentValue = holding.quantity * assetData.price;
+        const pnl = calculateProfitLoss(symbol);
+        const weight = totalAssets > 0 ? (currentValue / totalAssets) * 100 : 0;
+        const recommendation = getPositionRecommendation(symbol, assetData.score, weight);
+
+        const itemEl = document.createElement('div');
+        itemEl.className = 'holding-item';
+        itemEl.innerHTML = `
+            <div class="holding-item-header">
+                <span>${assetData.name} (${symbol})</span>
+                <span class="${pnl.amount >= 0 ? 'text-success' : 'text-danger'}">${pnl.percent.toFixed(2)}%</span>
+            </div>
+            <div class="holding-item-details">
+                <span>보유수량</span><span>${formatCurrency(holding.quantity, 4)}</span>
+                <span>평균매수가</span><span>${formatCurrency(holding.avgPrice)}원</span>
+                <span>현재가</span><span>${formatCurrency(assetData.price)}원</span>
+                <span>현재비중</span><span>${weight.toFixed(2)}%</span>
+            </div>
+            <div class="holding-item-pnl">
+                <span>평가손익</span>
+                <span class="${pnl.amount >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(pnl.amount)}원</span>
+            </div>
+            <div class="holding-item-footer">
+                <span class="badge ${recommendation.className}">${recommendation.action}</span>
+                <span class="text-secondary" style="font-size:0.75rem">${recommendation.message}</span>
+            </div>
+        `;
+        listEl.appendChild(itemEl);
+    });
+}
+
+function renderPortfolioChart() {
+    const ctx = document.getElementById('portfolio-chart').getContext('2d');
+    const { totalAssets } = calculatePortfolioValue();
+    
+    const labels = [];
+    const data = [];
+    const colors = ['#00bcd4', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#3f51b5', '#03a9f4', '#8bc34a'];
+    
+    let colorIndex = 0;
+    for (const symbol in portfolio.holdings) {
+        const holding = portfolio.holdings[symbol];
+        const assetData = getAssetData(symbol);
+        if (assetData) {
+            labels.push(assetData.name);
+            data.push(holding.quantity * assetData.price);
         }
+    }
+    
+    if (portfolio.cash > 0) {
+        labels.push('현금');
+        data.push(portfolio.cash);
+    }
+    
+    if (portfolioDoughnutChart) {
+        portfolioDoughnutChart.destroy();
+    }
+    
+    if (data.length === 0 || totalAssets === 0) {
+        document.getElementById('portfolio-chart-container').style.display = 'none';
         return;
-      }
-      container.innerHTML = `
-        <article class="chart-container" aria-label="포트폴리오 비중 차트">
-          <h2 style="margin-top:0;margin-bottom:12px;font-size:1rem;">포트폴리오 비중</h2>
-          <canvas id="portfolio-doughnut" height="240" aria-label="종목별 비중 도넛 차트"></canvas>
-        </article>
-      `;
-      const ctx = document.getElementById('portfolio-doughnut');
-      const labels = [];
-      const data = [];
-      const backgroundColors = [];
-      const metrics = calculatePortfolioValue();
-      const baseColors = ['#00bcd4', '#4dd0e1', '#26c6da', '#1de9b6', '#2979ff', '#7c4dff'];
-      let index = 0;
-      entries.forEach(([symbol, holding]) => {
-        const asset = getAssetData(symbol);
-        if (!asset) return;
-        const currentPrice = getCurrentPrice(asset.priceHistory);
-        const value = currentPrice * holding.quantity;
-        labels.push(`${asset.name}`);
-        data.push(value);
-        backgroundColors.push(baseColors[index % baseColors.length]);
-        index++;
-      });
-      labels.push('현금');
-      data.push(portfolio.cash);
-      backgroundColors.push('rgba(255,255,255,0.12)');
-      if (doughnutChart) {
-        doughnutChart.destroy();
-      }
-      doughnutChart = new Chart(ctx, {
+    }
+    
+    document.getElementById('portfolio-chart-container').style.display = 'block';
+
+    portfolioDoughnutChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels,
-          datasets: [{
-            data,
-            backgroundColor: backgroundColors,
-            borderColor: 'rgba(0,0,0,0.4)',
-            borderWidth: 1
-          }]
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: labels.map(() => colors[colorIndex++ % colors.length]),
+                borderColor: 'var(--bg-secondary)',
+            }]
         },
         options: {
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: 'rgba(255,255,255,0.78)',
-                boxWidth: 14,
-                font: {
-                  family: 'Noto Sans KR'
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: 'var(--text-secondary)',
+                        boxWidth: 12,
+                        padding: 15,
+                    }
                 }
-              }
             },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const label = context.label || '';
-                  const value = context.raw;
-                  return `${label}: ₩ ${formatCurrency(value)} (${((value / metrics.totalValue) * 100).toFixed(1)}%)`;
-                }
-              }
-            }
-          },
-          cutout: '62%',
-          responsive: true,
-          maintainAspectRatio: false
+            cutout: '60%'
         }
-      });
-    }
-
-    function getScoreBadge(score) {
-      if (score >= 80) return { label: '강력 매수', className: 'score-strong-buy' };
-      if (score >= 60) return { label: '매수', className: 'score-buy' };
-      if (score >= 40) return { label: '관망', className: 'score-neutral' };
-      if (score >= 20) return { label: '매도', className: 'score-sell' };
-      return { label: '강력 매도', className: 'score-strong-sell' };
-    }
-
-    function getPriceHistoryForRange(priceHistory, range) {
-      return priceHistory.slice(-range);
-    }
-
-    function getSmaForRange(smaSeries, range) {
-      return smaSeries.slice(-(range));
-    }
-
-    function getSignalsForRange(signals, range, totalLength) {
-      const startIndex = totalLength - range;
-      return signals
-        .filter(signal => signal.index >= startIndex)
-        .map(signal => ({ ...signal, index: signal.index - startIndex }));
-    }
-
-    function createTickerCard(symbol, assetData) {
-      const priceHistory = assetData.priceHistory;
-      const currentPrice = getCurrentPrice(priceHistory);
-      const previousPrice = getPreviousPrice(priceHistory);
-      const changePercent = ((currentPrice - previousPrice) / previousPrice) * 100;
-      const indicators = calculateIndicators(priceHistory);
-      const badge = getScoreBadge(indicators.score);
-      const range = chartRanges.get(symbol) ?? 30;
-      const holding = portfolio.holdings[symbol];
-      const holdingMetrics = holding ? calculateProfitLoss(symbol) : null;
-      const signalSubset = getSignalsForRange(indicators.signals, range, priceHistory.length);
-      const card = document.createElement('article');
-      card.className = 'ticker-card';
-      card.setAttribute('aria-label', `${assetData.name} 상세 정보`);
-
-      card.innerHTML = `
-        <div class="ticker-header">
-          <div class="ticker-title">
-            <h2>${assetData.name}</h2>
-            <span>${symbol}</span>
-          </div>
-          <div class="score-badge ${badge.className}" aria-label="추천 점수">${badge.label} · ${Math.round(indicators.score)}점</div>
-        </div>
-        <div class="info-row">
-          <div>
-            <div>현재가</div>
-            <strong>₩ ${formatCurrency(currentPrice)}</strong>
-          </div>
-          <div>
-            <div>전일 대비</div>
-            <strong class="${changePercent >= 0 ? 'change-positive' : 'change-negative'}">${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%</strong>
-          </div>
-          <div>
-            <div>거래량</div>
-            <strong>${assetData.volume}</strong>
-          </div>
-          <div>
-            <div>시가총액</div>
-            <strong>${assetData.marketCap}</strong>
-          </div>
-        </div>
-        <div class="indicator-grid" aria-label="기술적 지표">
-          <div class="indicator-item"><strong>SMA 5일</strong>${formatCurrency(Math.round(indicators.sma5))}</div>
-          <div class="indicator-item"><strong>SMA 20일</strong>${formatCurrency(Math.round(indicators.sma20))}</div>
-          <div class="indicator-item"><strong>RSI (14)</strong>${indicators.rsi.toFixed(1)}</div>
-          <div class="indicator-item"><strong>스토캐스틱 %K / %D</strong>${indicators.stochasticK.toFixed(1)} / ${indicators.stochasticD.toFixed(1)}</div>
-          <div class="indicator-item"><strong>MACD</strong>${indicators.macd.toFixed(2)}</div>
-          <div class="indicator-item"><strong>시그널</strong>${indicators.signal.toFixed(2)} (${indicators.histogram >= 0 ? '+' : ''}${indicators.histogram.toFixed(2)})</div>
-        </div>
-        <div>
-          <div class="range-control">
-            <span>차트 기간: <strong>${range}일</strong></span>
-            <input type="range" min="7" max="90" value="${range}" data-symbol="${symbol}" aria-label="${assetData.name} 차트 기간 조절">
-          </div>
-          <canvas id="chart-${symbol}" height="220" aria-label="${assetData.name} 가격 추이"></canvas>
-        </div>
-        ${holding ? `
-          <div class="portfolio-tag" aria-live="polite">
-            <span>보유 중 ✓</span>
-            <span>${formatNumber(holding.quantity, 4)} @ ₩ ${formatCurrency(holding.avgPrice)}</span>
-            <span class="${holdingMetrics.profit >= 0 ? 'change-positive' : 'change-negative'}">${holdingMetrics.profit >= 0 ? '+' : ''}${holdingMetrics.profitPercent.toFixed(2)}%</span>
-          </div>
-        ` : ''}
-        <div class="card-actions">
-          ${holding ? `
-            <button type="button" class="btn-secondary" data-action="edit" data-symbol="${symbol}">수정</button>
-            <button type="button" class="btn-danger" data-action="remove" data-symbol="${symbol}">삭제</button>
-          ` : `
-            <button type="button" class="btn-primary" data-action="add" data-symbol="${symbol}">포트폴리오에 추가</button>
-          `}
-        </div>
-      `;
-
-      const rangeInput = card.querySelector('input[type="range"]');
-      rangeInput.addEventListener('input', (event) => {
-        const newRange = Number(event.target.value);
-        chartRanges.set(symbol, newRange);
-        renderChartForSymbol(symbol, assetData, indicators, newRange);
-        event.target.previousElementSibling.querySelector('strong').textContent = `${newRange}일`;
-      });
-
-      const canvas = card.querySelector(`#chart-${symbol}`);
-      renderChartForSymbol(symbol, assetData, indicators, range, canvas, signalSubset);
-
-      const actionButtons = card.querySelectorAll('.card-actions button');
-      actionButtons.forEach((btn) => {
-        const action = btn.dataset.action;
-        if (action === 'add') {
-          btn.addEventListener('click', () => showAddModal(symbol));
-        } else if (action === 'edit') {
-          btn.addEventListener('click', () => showEditModal(symbol));
-        } else if (action === 'remove') {
-          btn.addEventListener('click', () => {
-            if (confirm(`${assetData.name} 보유 정보를 삭제할까요?`)) {
-              removeHolding(symbol);
-            }
-          });
-        }
-      });
-
-      return card;
-    }
-
-    function renderChartForSymbol(symbol, assetData, indicators, range, canvas, signalSubset) {
-      const targetCanvas = canvas || document.getElementById(`chart-${symbol}`);
-      if (!targetCanvas) return;
-      if (chartInstances.has(symbol)) {
-        chartInstances.get(symbol).destroy();
-      }
-      const history = getPriceHistoryForRange(assetData.priceHistory, range);
-      const smaSeries = getSmaForRange(indicators.smaSeries, range);
-      const totalLength = assetData.priceHistory.length;
-      const signals = signalSubset ?? getSignalsForRange(indicators.signals, range, totalLength);
-      const labels = history.map((_, idx) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (history.length - 1 - idx));
-        return `${date.getMonth() + 1}/${date.getDate()}`;
-      });
-      const buyPoints = signals.filter(signal => signal.type === 'buy').map(signal => ({ x: signal.index, y: history[signal.index] }));
-      const sellPoints = signals.filter(signal => signal.type === 'sell').map(signal => ({ x: signal.index, y: history[signal.index] }));
-      const ctx = targetCanvas.getContext('2d');
-      chartInstances.set(symbol, new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: '종가',
-              data: history,
-              borderColor: 'rgba(0, 188, 212, 0.8)',
-              backgroundColor: 'rgba(0, 188, 212, 0.12)',
-              tension: 0.32,
-              pointRadius: 0,
-              borderWidth: 2
-            },
-            {
-              label: 'SMA5',
-              data: smaSeries,
-              borderColor: 'rgba(77, 208, 225, 0.9)',
-              borderDash: [6, 4],
-              tension: 0.25,
-              pointRadius: 0,
-              borderWidth: 1.5
-            },
-            {
-              type: 'scatter',
-              label: '매수 시그널',
-              data: buyPoints,
-              pointBackgroundColor: 'rgba(76, 175, 80, 1)',
-              pointBorderColor: '#1b5e20',
-              pointRadius: 6,
-              pointStyle: 'triangle'
-            },
-            {
-              type: 'scatter',
-              label: '매도 시그널',
-              data: sellPoints,
-              pointBackgroundColor: 'rgba(244, 67, 54, 1)',
-              pointBorderColor: '#880e4f',
-              pointRadius: 6,
-              pointStyle: 'triangle',
-              rotation: 180
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: {
-                color: 'rgba(255,255,255,0.54)'
-              },
-              grid: {
-                color: 'rgba(255,255,255,0.04)'
-              }
-            },
-            y: {
-              ticks: {
-                color: 'rgba(255,255,255,0.54)'
-              },
-              grid: {
-                color: 'rgba(255,255,255,0.05)'
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: 'rgba(255,255,255,0.8)',
-                usePointStyle: true,
-                font: {
-                  family: 'Noto Sans KR'
-                }
-              }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(32,32,32,0.92)',
-              titleColor: '#ffffff',
-              bodyColor: '#cfd8dc',
-              callbacks: {
-                label: (context) => {
-                  if (context.datasetIndex <= 1) {
-                    return `${context.dataset.label}: ₩ ${formatCurrency(context.parsed.y)}`;
-                  }
-                  return `${context.dataset.label}: ₩ ${formatCurrency(context.parsed.y)}`;
-                }
-              }
-            }
-          }
-        }
-      }));
-    }
-
-    function renderTickerGrid() {
-      const grid = document.getElementById('ticker-grid');
-      grid.innerHTML = '';
-      grid.setAttribute('aria-labelledby', `tab-${currentTab}`);
-      const category = mockData[currentTab];
-      Object.entries(category).forEach(([symbol, data]) => {
-        const card = createTickerCard(symbol, data);
-        grid.appendChild(card);
-      });
-    }
-
-    function showAddModal(symbol) {
-      modalMode = 'add';
-      modalSymbol = symbol;
-      document.getElementById('modal-title').textContent = '포트폴리오에 추가';
-      document.getElementById('quantity').value = '';
-      document.getElementById('avgPrice').value = '';
-      openModal();
-    }
-
-    function showEditModal(symbol) {
-      const holding = portfolio.holdings[symbol];
-      if (!holding) return;
-      modalMode = 'edit';
-      modalSymbol = symbol;
-      document.getElementById('modal-title').textContent = '보유 정보 수정';
-      document.getElementById('quantity').value = holding.quantity;
-      document.getElementById('avgPrice').value = holding.avgPrice;
-      openModal();
-    }
-
-    function openModal() {
-      const modal = document.getElementById('modal');
-      modal.classList.remove('hidden');
-      modal.querySelector('input').focus();
-    }
-
-    function closeModal() {
-      const modal = document.getElementById('modal');
-      modal.classList.add('hidden');
-      modalSymbol = null;
-    }
-
-    function handleFormSubmit(event) {
-      event.preventDefault();
-      const quantity = parseFloat(document.getElementById('quantity').value);
-      const avgPrice = parseFloat(document.getElementById('avgPrice').value);
-      if (Number.isNaN(quantity) || Number.isNaN(avgPrice) || quantity <= 0 || avgPrice <= 0) {
-        alert('수량과 가격은 0보다 큰 숫자로 입력하세요.');
-        return;
-      }
-      if (!modalSymbol) return;
-      if (modalMode === 'add' && portfolio.holdings[modalSymbol]) {
-        if (!confirm('이미 보유 중인 종목입니다. 기존 정보를 덮어쓸까요?')) {
-          return;
-        }
-        updateHolding(modalSymbol, quantity, avgPrice);
-      } else if (modalMode === 'add') {
-        addHolding(modalSymbol, quantity, avgPrice);
-      } else {
-        updateHolding(modalSymbol, quantity, avgPrice);
-      }
-      closeModal();
-    }
-
-    function refreshData() {
-      chartInstances.forEach((chart) => chart.destroy());
-      chartInstances.clear();
-      renderAll();
-    }
-
-    function renderAll() {
-      renderPortfolioSummary();
-      renderHoldingsList();
-      renderPortfolioChart();
-      renderTickerGrid();
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      loadPortfolio();
-      renderAll();
-
-      document.querySelectorAll('.tab-btn').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-          const selected = event.currentTarget.dataset.tab;
-          if (selected === currentTab) return;
-          document.querySelectorAll('.tab-btn').forEach((tab) => {
-            tab.classList.toggle('active', tab.dataset.tab === selected);
-            tab.setAttribute('aria-selected', tab.dataset.tab === selected ? 'true' : 'false');
-          });
-          currentTab = selected;
-          chartInstances.forEach((chart) => chart.destroy());
-          chartInstances.clear();
-          renderTickerGrid();
-        });
-      });
-
-      document.getElementById('modal-close').addEventListener('click', closeModal);
-      document.getElementById('holding-form').addEventListener('submit', handleFormSubmit);
-
-      document.getElementById('modal').addEventListener('click', (event) => {
-        if (event.target.id === 'modal') {
-          closeModal();
-        }
-      });
-
-      document.getElementById('refresh-button').addEventListener('click', refreshData);
-
-      const sidebarToggle = document.getElementById('sidebar-toggle');
-      const sidebar = document.getElementById('portfolio-sidebar');
-      sidebarToggle.addEventListener('click', () => {
-        const expanded = sidebarToggle.getAttribute('aria-expanded') === 'true';
-        sidebarToggle.setAttribute('aria-expanded', String(!expanded));
-        sidebar.classList.toggle('mobile-open', !expanded);
-      });
-
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-          closeModal();
-        }
-      });
     });
-  </script>
+}
+
+function renderTickerGrid() {
+    const gridEl = document.getElementById('ticker-grid');
+    gridEl.innerHTML = '';
+    const dataSet = mockData[currentTab];
+    for (const symbol in dataSet) {
+        const data = dataSet[symbol];
+        const isHolding = !!portfolio.holdings[symbol];
+        const card = renderTickerCard(symbol, data, isHolding);
+        gridEl.appendChild(card);
+    }
+}
+
+function getScoreBadge(score) {
+    if (score >= 80) return { text: '강력 매수', className: 'badge-buy' };
+    if (score >= 60) return { text: '매수', className: 'badge-buy' };
+    if (score >= 40) return { text: '관망', className: 'badge-neutral' };
+    if (score >= 20) return { text: '매도', className: 'badge-sell' };
+    return { text: '강력 매도', className: 'badge-sell' };
+}
+
+function renderTickerCard(symbol, data, isHolding) {
+    const cardEl = document.createElement('div');
+    cardEl.className = `ticker-card ${isHolding ? 'holding' : ''}`;
+    cardEl.dataset.symbol = symbol;
+
+    const changeClass = data.change >= 0 ? 'text-success' : 'text-danger';
+    const scoreBadge = getScoreBadge(data.score);
+
+    let portfolioSection = '';
+    if (isHolding) {
+        const holding = portfolio.holdings[symbol];
+        const pnl = calculateProfitLoss(symbol);
+        portfolioSection = `
+            <div class="ticker-portfolio-info">
+                <hr style="border-color: var(--border-color); margin: 0.5rem 0;">
+                <div class="ticker-info-grid">
+                    <span>보유수량</span><span>${formatCurrency(holding.quantity, 4)}</span>
+                    <span>평균단가</span><span>${formatCurrency(holding.avgPrice)}원</span>
+                    <span>평가손익</span><span class="${pnl.amount >= 0 ? 'text-success' : 'text-danger'}">${pnl.percent.toFixed(2)}%</span>
+                </div>
+            </div>
+        `;
+    }
+
+    cardEl.innerHTML = `
+        <div class="ticker-header">
+            <div>
+                <h3>${data.name} <span class="text-secondary">${symbol}</span></h3>
+                <span class="ticker-price">${formatCurrency(data.price)}원</span>
+                <span class="${changeClass}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change)}%</span>
+            </div>
+            <div>
+                ${isHolding ? '<span class="badge badge-holding">보유 중 ✓</span>' : ''}
+                <span class="badge ${scoreBadge.className}" style="margin-top: 5px; display: inline-block;">${scoreBadge.text} (${data.score})</span>
+            </div>
+        </div>
+        <div class="ticker-info-grid">
+            <span>거래량</span><span>${formatCurrency(data.volume)}</span>
+            <span>시가총액</span><span>${data.marketCap}</span>
+        </div>
+        <div class="ticker-indicators">
+            <span>SMA(5/20)</span><span>${formatCurrency(data.indicators.sma5)} / ${formatCurrency(data.indicators.sma20)}</span>
+            <span>RSI(14)</span><span>${data.indicators.rsi.toFixed(2)}</span>
+            <span>Stochastic</span><span>${data.indicators.stochasticK.toFixed(2)}</span>
+            <span>MACD</span><span>${formatCurrency(data.indicators.macd)}</span>
+        </div>
+        <div class="ticker-chart-container">
+            <canvas id="chart-${symbol}"></canvas>
+        </div>
+        ${portfolioSection}
+        <div class="ticker-actions">
+            ${isHolding ? `
+                <button class="btn btn-secondary btn-edit">수정</button>
+                <button class="btn btn-danger btn-delete">삭제</button>
+            ` : `
+                <button class="btn btn-primary btn-add btn-full">포트폴리오에 추가</button>
+            `}
+        </div>
+    `;
+
+    // 차트 렌더링은 cardEl이 DOM에 추가된 후에 호출해야 합니다.
+    // setTimeout을 사용하여 다음 렌더링 사이클에 실행하도록 합니다.
+    setTimeout(() => {
+        const ctx = document.getElementById(`chart-${symbol}`)?.getContext('2d');
+        if (ctx) {
+            if (chartInstances[symbol]) {
+                chartInstances[symbol].destroy();
+            }
+            chartInstances[symbol] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 30 }, (_, i) => i + 1),
+                    datasets: [{
+                        label: '가격',
+                        data: data.priceHistory.slice(-30),
+                        borderColor: 'var(--accent-blue)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    }, 0);
+
+    return cardEl;
+}
+
+// ========== 모달 관리 ==========
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const form = document.getElementById('holding-form');
+const symbolInput = document.getElementById('symbol');
+const quantityInput = document.getElementById('quantity');
+const avgPriceInput = document.getElementById('avgPrice');
+
+function showModal(symbol, isEdit = false) {
+    const assetData = getAssetData(symbol);
+    form.reset();
+    symbolInput.value = symbol;
+
+    if (isEdit) {
+        const holding = portfolio.holdings[symbol];
+        modalTitle.textContent = `${assetData.name} 수정`;
+        quantityInput.value = holding.quantity;
+        avgPriceInput.value = holding.avgPrice;
+    } else {
+        modalTitle.textContent = `${assetData.name} 추가`;
+    }
+    modal.classList.add('visible');
+}
+
+function closeModal() {
+    modal.classList.remove('visible');
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const symbol = symbolInput.value;
+    const quantity = parseFloat(quantityInput.value);
+    const avgPrice = parseFloat(avgPriceInput.value);
+
+    if (quantity < 0 || avgPrice < 0) {
+        alert("수량과 가격은 음수일 수 없습니다.");
+        return;
+    }
+
+    addOrUpdateHolding(symbol, quantity, avgPrice);
+    closeModal();
+}
+
+// ========== 이벤트 리스너 ==========
+document.addEventListener('DOMContentLoaded', () => {
+    loadPortfolio();
+    renderAll();
+
+    // 탭 전환
+    document.querySelector('.tabs').addEventListener('click', (e) => {
+        if (e.target.classList.contains('tab-btn')) {
+            document.querySelector('.tab-btn.active').classList.remove('active');
+            e.target.classList.add('active');
+            currentTab = e.target.dataset.tab;
+            renderTickerGrid();
+        }
+    });
+
+    // 종목 카드 내 버튼 (이벤트 위임)
+    document.getElementById('ticker-grid').addEventListener('click', (e) => {
+        const card = e.target.closest('.ticker-card');
+        if (!card) return;
+        const symbol = card.dataset.symbol;
+
+        if (e.target.classList.contains('btn-add')) {
+            showModal(symbol, false);
+        } else if (e.target.classList.contains('btn-edit')) {
+            showModal(symbol, true);
+        } else if (e.target.classList.contains('btn-delete')) {
+            removeHolding(symbol);
+        }
+    });
+    
+    // 모바일 햄버거 메뉴
+    document.getElementById('hamburger-menu').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    // 모달 관련
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    form.addEventListener('submit', handleFormSubmit);
+});
+
+function renderAll() {
+    renderPortfolioSummary();
+    renderHoldingsList();
+    renderPortfolioChart();
+    renderTickerGrid();
+}
+</script>
 </body>
 </html>
